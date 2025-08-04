@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { secureStorage, sanitizeText } from '@/lib/security';
 
 interface Question {
   id: string;
@@ -50,8 +51,16 @@ const Interview = () => {
   const progress = ((currentQuestionIndex + 1) / mockQuestions.length) * 50 + 50; // 50-100% range
 
   useEffect(() => {
-    const assessmentData = localStorage.getItem('currentAssessment');
+    const assessmentData = secureStorage.get('currentAssessment');
     if (!assessmentData) {
+      navigate('/profile-selection');
+      return;
+    }
+    
+    // Check if assessment is stale (older than 1 hour)
+    const isStale = assessmentData.timestamp && (Date.now() - assessmentData.timestamp > 3600000);
+    if (isStale) {
+      secureStorage.clear();
       navigate('/profile-selection');
       return;
     }
@@ -81,24 +90,39 @@ const Interview = () => {
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      const assessmentData = JSON.parse(localStorage.getItem('currentAssessment') || '{}');
+      const assessmentData = secureStorage.get('currentAssessment');
+      if (!assessmentData) {
+        throw new Error('Assessment data not found');
+      }
+      
+      // Sanitize all response data
+      const sanitizedResponses = Object.fromEntries(
+        Object.entries(responses).map(([key, value]) => [
+          key,
+          typeof value === 'string' ? sanitizeText(value) : value
+        ])
+      );
       
       // Call the medical analysis API
       const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
         body: {
-          symptoms: assessmentData.symptoms || '',
-          interviewResponses: responses,
+          symptoms: sanitizeText(assessmentData.symptoms || ''),
+          interviewResponses: sanitizedResponses,
           profileData: assessmentData.profileData
         }
       });
 
       if (error) throw error;
 
-      // Update localStorage with API results
-      assessmentData.interviewResponses = responses;
-      assessmentData.analysisResults = data;
-      assessmentData.step = 'results';
-      localStorage.setItem('currentAssessment', JSON.stringify(assessmentData));
+      // Update secure storage with API results
+      const updatedAssessment = {
+        ...assessmentData,
+        interviewResponses: sanitizedResponses,
+        analysisResults: data,
+        step: 'results',
+        timestamp: Date.now()
+      };
+      secureStorage.set('currentAssessment', updatedAssessment);
       
       navigate('/results');
     } catch (error) {

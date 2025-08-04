@@ -5,7 +5,73 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Security-Policy': "default-src 'self'",
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block'
 };
+
+// Rate limiting storage
+const requestCounts = new Map<string, { count: number, resetTime: number }>();
+
+function isRateLimited(clientId: string, maxRequests: number = 5, windowMs: number = 60000): boolean {
+  const now = Date.now();
+  const userLimit = requestCounts.get(clientId);
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    requestCounts.set(clientId, { count: 1, resetTime: now + windowMs });
+    return false;
+  }
+  
+  if (userLimit.count >= maxRequests) {
+    return true;
+  }
+  
+  userLimit.count++;
+  return false;
+}
+
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/[<>'"&]/g, (char) => {
+      const map: Record<string, string> = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;',
+      };
+      return map[char] || char;
+    })
+    .trim()
+    .slice(0, 2000);
+}
+
+function validateSymptoms(symptoms: string): string[] {
+  const errors: string[] = [];
+  
+  if (!symptoms || symptoms.trim().length < 10) {
+    errors.push('Symptoms description must be at least 10 characters');
+  }
+  
+  if (symptoms.length > 2000) {
+    errors.push('Symptoms description too long');
+  }
+  
+  // Check for suspicious patterns
+  const suspiciousPatterns = [
+    /<script/i,
+    /javascript:/i,
+    /on\w+\s*=/i,
+    /data:text\/html/i,
+  ];
+  
+  if (suspiciousPatterns.some(pattern => pattern.test(symptoms))) {
+    errors.push('Invalid content detected in symptoms');
+  }
+  
+  return errors;
+}
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -54,6 +120,20 @@ serve(async (req) => {
   );
 
   try {
+    // Get client IP for rate limiting
+    const clientIp = req.headers.get('x-forwarded-for') || 
+                    req.headers.get('cf-connecting-ip') || 
+                    req.headers.get('x-real-ip') || 
+                    'unknown';
+    
+    // Global rate limiting check
+    if (isRateLimited(clientIp, 10, 300000)) { // 10 requests per 5 minutes
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 429,
+      });
+    }
+
     // Authenticate user
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
@@ -69,6 +149,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid authentication" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
+      });
+    }
+
+    // User-specific rate limiting
+    if (isRateLimited(`user_${userData.user.id}`, 5, 600000)) { // 5 requests per 10 minutes per user
+      return new Response(JSON.stringify({ error: 'User rate limit exceeded. Please wait before making another request.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 429,
       });
     }
 
@@ -105,20 +193,50 @@ serve(async (req) => {
         .eq('user_id', userData.user.id);
     }
 
-    const { symptoms, interviewResponses, profileData }: AnalysisRequest = await req.json();
+    const requestBody = await req.json();
+    const { symptoms, interviewResponses, profileData }: AnalysisRequest = requestBody;
 
-    // Input validation and sanitization
-    if (!symptoms || typeof symptoms !== 'string' || symptoms.trim().length === 0) {
+    // Enhanced input validation
+    if (!symptoms || typeof symptoms !== 'string') {
       return new Response(JSON.stringify({ error: "Valid symptoms description is required" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
     }
 
-    // Sanitize input
-    const sanitizedSymptoms = symptoms.trim().substring(0, 1000); // Limit length
+    // Validate and sanitize symptoms
+    const validationErrors = validateSymptoms(symptoms);
+    if (validationErrors.length > 0) {
+      return new Response(JSON.stringify({ error: validationErrors.join(', ') }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
 
-    console.log('Analyzing symptoms:', { symptoms, interviewResponses, profileData });
+    const sanitizedSymptoms = sanitizeInput(symptoms);
+
+    console.log('Analyzing symptoms for authenticated user:', { userId: userData.user.id });
+
+    // Store assessment in database with sanitized data
+    const { error: insertError } = await supabaseService
+      .from('assessments')
+      .insert({
+        user_id: userData.user.id,
+        symptom_description: sanitizedSymptoms,
+        interview_responses: interviewResponses,
+        api_results: null, // Will be updated after analysis
+        conditions: [],
+        triage_level: 'green',
+        next_steps: 'Analyzing...'
+      });
+
+    if (insertError) {
+      console.error('Error storing assessment:', insertError);
+      return new Response(JSON.stringify({ error: 'Failed to store assessment data' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
 
     // Perform rule-based medical analysis
     const analysisResult = await performMedicalAnalysis(sanitizedSymptoms, interviewResponses, profileData);

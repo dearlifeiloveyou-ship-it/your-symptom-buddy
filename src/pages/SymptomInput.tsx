@@ -5,22 +5,38 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { symptomSchema, secureStorage, sanitizeText } from '@/lib/security';
 
 const SymptomInput = () => {
   const navigate = useNavigate();
   const [symptoms, setSymptoms] = useState('');
   const [isValid, setIsValid] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
   const handleInputChange = (value: string) => {
-    setSymptoms(value);
-    setIsValid(value.trim().length >= 10);
+    const sanitizedValue = sanitizeText(value);
+    setSymptoms(sanitizedValue);
+    
+    // Validate using schema
+    const result = symptomSchema.safeParse(sanitizedValue);
+    if (result.success) {
+      setIsValid(true);
+      setValidationError('');
+    } else {
+      setIsValid(false);
+      setValidationError(result.error.errors[0].message);
+    }
   };
 
   const handleContinue = () => {
-    localStorage.setItem('currentAssessment', JSON.stringify({
-      symptoms,
-      step: 'interview'
-    }));
+    if (!isValid) return;
+    
+    // Use secure storage instead of localStorage for sensitive data
+    secureStorage.set('currentAssessment', {
+      symptoms: sanitizeText(symptoms),
+      step: 'interview',
+      timestamp: Date.now()
+    });
     navigate('/interview');
   };
 
@@ -50,12 +66,15 @@ const SymptomInput = () => {
                   value={symptoms}
                   onChange={(e) => handleInputChange(e.target.value)}
                   className="min-h-[150px] text-base"
-                  maxLength={1000}
+                  maxLength={2000}
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Minimum 10 characters for analysis</span>
-                  <span>{symptoms.length}/1000</span>
+                  <span>{symptoms.length}/2000</span>
                 </div>
+                {validationError && (
+                  <p className="text-sm text-destructive">{validationError}</p>
+                )}
               </div>
 
               <div className="bg-secondary/30 p-4 rounded-lg">

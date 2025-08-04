@@ -9,12 +9,49 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { emailSchema, passwordSchema, nameSchema, authRateLimiter, sanitizeText } from '@/lib/security';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const validateInput = (name: string, value: string, isSignUp: boolean = false) => {
+    const errors = { ...validationErrors };
+    
+    switch (name) {
+      case 'email':
+        const emailResult = emailSchema.safeParse(value);
+        if (!emailResult.success) {
+          errors.email = emailResult.error.errors[0].message;
+        } else {
+          delete errors.email;
+        }
+        break;
+      case 'password':
+        const passwordResult = passwordSchema.safeParse(value);
+        if (!passwordResult.success) {
+          errors.password = passwordResult.error.errors[0].message;
+        } else {
+          delete errors.password;
+        }
+        break;
+      case 'fullName':
+        if (isSignUp) {
+          const nameResult = nameSchema.safeParse(value);
+          if (!nameResult.success) {
+            errors.fullName = nameResult.error.errors[0].message;
+          } else {
+            delete errors.fullName;
+          }
+        }
+        break;
+    }
+    
+    setValidationErrors(errors);
+  };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,6 +61,23 @@ export default function Auth() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+
+    // Validate inputs
+    const emailResult = emailSchema.safeParse(email);
+    const passwordResult = passwordSchema.safeParse(password);
+    
+    if (!emailResult.success || !passwordResult.success) {
+      setError("Please check your email and password format.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Rate limiting check
+    if (!authRateLimiter.isAllowed(`signin_${email}`, 5, 300000)) {
+      setError("Too many sign-in attempts. Please try again in 5 minutes.");
+      setIsLoading(false);
+      return;
+    }
 
     const { error } = await signIn(email, password);
     
@@ -35,6 +89,7 @@ export default function Auth() {
         variant: "destructive"
       });
     } else {
+      authRateLimiter.reset(`signin_${email}`);
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in."
@@ -55,7 +110,26 @@ export default function Auth() {
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
 
-    const { error } = await signUp(email, password, fullName);
+    // Validate inputs
+    const emailResult = emailSchema.safeParse(email);
+    const passwordResult = passwordSchema.safeParse(password);
+    const nameResult = nameSchema.safeParse(fullName);
+    
+    if (!emailResult.success || !passwordResult.success || !nameResult.success) {
+      setError("Please check all fields and ensure they meet the requirements.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Rate limiting check
+    if (!authRateLimiter.isAllowed(`signup_${email}`, 3, 3600000)) {
+      setError("Too many sign-up attempts. Please try again in 1 hour.");
+      setIsLoading(false);
+      return;
+    }
+
+    const sanitizedName = sanitizeText(fullName);
+    const { error } = await signUp(email, password, sanitizedName);
     
     if (error) {
       setError(error.message);
@@ -65,6 +139,7 @@ export default function Auth() {
         variant: "destructive"
       });
     } else {
+      authRateLimiter.reset(`signup_${email}`);
       toast({
         title: "Welcome to MDSDR!",
         description: "Please check your email to confirm your account."
@@ -100,7 +175,11 @@ export default function Auth() {
                     type="email"
                     placeholder="Enter your email"
                     required
+                    onChange={(e) => validateInput('email', e.target.value)}
                   />
+                  {validationErrors.email && (
+                    <p className="text-sm text-destructive">{validationErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -110,7 +189,11 @@ export default function Auth() {
                     type="password"
                     placeholder="Enter your password"
                     required
+                    onChange={(e) => validateInput('password', e.target.value)}
                   />
+                  {validationErrors.password && (
+                    <p className="text-sm text-destructive">{validationErrors.password}</p>
+                  )}
                 </div>
                 {error && (
                   <Alert variant="destructive">
@@ -162,7 +245,11 @@ export default function Auth() {
                     type="text"
                     placeholder="Enter your full name"
                     required
+                    onChange={(e) => validateInput('fullName', e.target.value, true)}
                   />
+                  {validationErrors.fullName && (
+                    <p className="text-sm text-destructive">{validationErrors.fullName}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -172,7 +259,11 @@ export default function Auth() {
                     type="email"
                     placeholder="Enter your email"
                     required
+                    onChange={(e) => validateInput('email', e.target.value, true)}
                   />
+                  {validationErrors.email && (
+                    <p className="text-sm text-destructive">{validationErrors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -180,9 +271,13 @@ export default function Auth() {
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Create a password (8+ chars, uppercase, lowercase, number)"
                     required
+                    onChange={(e) => validateInput('password', e.target.value, true)}
                   />
+                  {validationErrors.password && (
+                    <p className="text-sm text-destructive">{validationErrors.password}</p>
+                  )}
                 </div>
                 {error && (
                   <Alert variant="destructive">
