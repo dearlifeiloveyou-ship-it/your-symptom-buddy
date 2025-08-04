@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, Heart, Clock, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import PricingSection from '@/components/PricingSection';
-import KeyboardTest from '@/components/KeyboardTest';
+
 
 export default function Landing() {
   const { user } = useAuth();
@@ -187,13 +187,6 @@ export default function Landing() {
             Get started for free or unlock premium features
           </p>
           <PricingSection />
-        </div>
-      </section>
-
-      {/* Keyboard Test Section - for debugging */}
-      <section className="py-8 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <KeyboardTest />
         </div>
       </section>
 

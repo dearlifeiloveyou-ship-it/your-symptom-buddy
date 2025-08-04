@@ -14,11 +14,10 @@ const SymptomInput = () => {
   const [validationError, setValidationError] = useState('');
 
   const handleInputChange = (value: string) => {
-    const sanitizedValue = sanitizeText(value);
-    setSymptoms(sanitizedValue);
+    setSymptoms(value);
     
-    // Validate using schema
-    const result = symptomSchema.safeParse(sanitizedValue);
+    // Validate using schema without sanitization during typing
+    const result = symptomSchema.safeParse(value);
     if (result.success) {
       setIsValid(true);
       setValidationError('');
@@ -31,9 +30,12 @@ const SymptomInput = () => {
   const handleContinue = () => {
     if (!isValid) return;
     
+    // Sanitize only when saving/submitting
+    const sanitizedSymptoms = sanitizeText(symptoms);
+    
     // Use secure storage instead of localStorage for sensitive data
     secureStorage.set('currentAssessment', {
-      symptoms: sanitizeText(symptoms),
+      symptoms: sanitizedSymptoms,
       step: 'interview',
       timestamp: Date.now()
     });
