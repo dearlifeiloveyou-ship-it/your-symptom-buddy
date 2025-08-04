@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_coach_conversations: {
+        Row: {
+          ai_response: string
+          coach_type: string
+          context_data: Json | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          user_message: string
+        }
+        Insert: {
+          ai_response: string
+          coach_type: string
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          user_message: string
+        }
+        Update: {
+          ai_response?: string
+          coach_type?: string
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          user_message?: string
+        }
+        Relationships: []
+      }
       assessments: {
         Row: {
           api_results: Json | null
