@@ -169,6 +169,14 @@ export default function PricingSection({ currentPlan, className }: PricingSectio
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-green-500" />
+              <span className="font-medium">AI Health Coach</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <span className="font-medium">AI Mental Health Coach</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500" />
               <span>Detailed PDF health reports</span>
             </li>
             <li className="flex items-center gap-2">

@@ -153,14 +153,14 @@ const PremiumFeatures = () => {
                 </Button>
               </CardContent>
             ) : (
-              <CardContent>
-                <Button onClick={startCheckout} className="mr-4">
-                  Upgrade to Premium - $7.99/month
-                </Button>
-                <Button onClick={checkSubscriptionStatus} variant="outline">
-                  Refresh Status
-                </Button>
-              </CardContent>
+            <CardContent>
+              <Button onClick={startCheckout} className="mr-4">
+                Upgrade to Premium - $9.99/month
+              </Button>
+              <Button onClick={checkSubscriptionStatus} variant="outline">
+                Refresh Status
+              </Button>
+            </CardContent>
             )}
           </Card>
 

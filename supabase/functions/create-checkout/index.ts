@@ -57,7 +57,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: { 
               name: "MDSDR Premium Health Plan",
-              description: "Unlimited symptom checks, detailed reports, tracking & family profiles"
+              description: "Unlimited symptom checks, AI Health & Mental Health Coaches, detailed reports, tracking & family profiles"
             },
             unit_amount: 999, // $9.99
             recurring: { interval: "month" },
