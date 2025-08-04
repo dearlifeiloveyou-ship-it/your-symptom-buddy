@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Heart, Clock, Users } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Landing() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,12 +44,29 @@ export default function Landing() {
             Bridge the gap between acute care and chronic condition management.
           </p>
           <div className="space-x-4">
-            <Button size="lg" asChild>
-              <Link to="/symptom-check">Check My Symptoms</Link>
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/profile-selection')}
+            >
+              Check My Symptoms
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/disclaimer">Medical Disclaimer</Link>
-            </Button>
+            {user ? (
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/auth')}
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </section>
