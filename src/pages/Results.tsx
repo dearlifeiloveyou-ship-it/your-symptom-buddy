@@ -53,17 +53,23 @@ const Results = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    // Clear any stale data first
+    secureStorage.remove('currentAssessment');
+    
     const assessmentData = secureStorage.get('currentAssessment');
     if (!assessmentData) {
+      console.log('No assessment data found, redirecting to start');
       navigate('/profile-selection');
       return;
     }
 
+    console.log('Assessment data found:', assessmentData);
+    
     try {
       if (assessmentData.analysisResults) {
+        console.log('Loading analysis results:', assessmentData.analysisResults);
         setResults(assessmentData.analysisResults);
       } else {
-        // No analysis results found - redirect back to start the process
         console.log('No analysis results found in assessment data');
         navigate('/profile-selection');
         return;
