@@ -373,11 +373,11 @@ function searchSymptoms(symptomText: string): SymptomPattern[] {
     .map(({ matchScore, ...pattern }) => pattern);
 }
 
-// Comprehensive symptom database based on ICD-10 classifications
+// Enhanced comprehensive symptom database with improved accuracy
 const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
   // CARDIOVASCULAR & CIRCULATORY SYMPTOMS (R00-R09)
   {
-    keywords: ['chest pain', 'heart attack', 'cardiac', 'crushing pain', 'pressure chest', 'angina'],
+    keywords: ['chest pain', 'heart attack', 'cardiac', 'crushing pain', 'pressure chest', 'angina', 'tight chest', 'squeezing chest'],
     conditions: ['Myocardial infarction', 'Angina pectoris', 'Acute coronary syndrome'],
     triageLevel: 'high',
     likelihood: 90,
@@ -514,11 +514,96 @@ const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
     naturalRemedies: 'Ensure safety, turn person on side, do not restrain.'
   },
   {
-    keywords: ['urinary', 'urine', 'bladder', 'kidney'],
+    keywords: ['urinary', 'urine', 'bladder', 'kidney', 'burning urination', 'frequent urination'],
     conditions: ['UTI', 'Kidney stones', 'Bladder infection'],
     triageLevel: 'medium',
     likelihood: 75,
     recommendation: 'Increase fluid intake and see healthcare provider.',
     naturalRemedies: 'Cranberry juice, increased water, avoid irritants.'
+  },
+  // GASTROINTESTINAL SYMPTOMS
+  {
+    keywords: ['stomach pain', 'indigestion', 'heartburn', 'acid reflux', 'bloating', 'gas'],
+    conditions: ['GERD', 'Gastritis', 'Peptic ulcer', 'Dyspepsia'],
+    triageLevel: 'low',
+    likelihood: 70,
+    recommendation: 'Monitor symptoms, avoid trigger foods. See provider if persistent.',
+    naturalRemedies: 'Ginger tea, smaller meals, avoid spicy foods, elevate head while sleeping.'
+  },
+  {
+    keywords: ['diarrhea', 'loose stools', 'watery stool', 'stomach bug'],
+    conditions: ['Gastroenteritis', 'Food poisoning', 'IBS', 'Viral infection'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'Stay hydrated, rest. See provider if fever or severe dehydration.',
+    naturalRemedies: 'BRAT diet, electrolyte solutions, probiotics, rest.'
+  },
+  {
+    keywords: ['constipation', 'hard stool', 'difficulty bowel movement', 'straining'],
+    conditions: ['Constipation', 'IBS', 'Dehydration'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Increase fiber and fluids. See provider if persistent.',
+    naturalRemedies: 'Fiber-rich foods, prunes, adequate water intake, regular exercise.'
+  },
+  // RESPIRATORY SYMPTOMS
+  {
+    keywords: ['wheezing', 'asthma', 'tight breathing', 'chest tightness'],
+    conditions: ['Asthma', 'Bronchitis', 'COPD', 'Allergic reaction'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'Use rescue inhaler if available. Seek care if breathing difficulty persists.',
+    naturalRemedies: 'Sit upright, use inhaler, avoid triggers, calm breathing techniques.'
+  },
+  {
+    keywords: ['sore throat', 'throat pain', 'scratchy throat', 'swollen throat'],
+    conditions: ['Viral pharyngitis', 'Strep throat', 'Common cold'],
+    triageLevel: 'low',
+    likelihood: 85,
+    recommendation: 'Rest, warm liquids. See provider if severe or fever present.',
+    naturalRemedies: 'Warm salt water gargle, honey and lemon, throat lozenges, rest.'
+  },
+  // NEUROLOGICAL SYMPTOMS
+  {
+    keywords: ['memory loss', 'forgetfulness', 'confusion', 'cognitive decline'],
+    conditions: ['Mild cognitive impairment', 'Dementia', 'Depression', 'Medication side effects'],
+    triageLevel: 'medium',
+    likelihood: 60,
+    recommendation: 'Schedule evaluation with healthcare provider for cognitive assessment.',
+    naturalRemedies: 'Mental exercises, social engagement, regular exercise, adequate sleep.'
+  },
+  {
+    keywords: ['numbness', 'tingling', 'pins and needles', 'limb weakness'],
+    conditions: ['Peripheral neuropathy', 'Nerve compression', 'Vitamin deficiency'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'See healthcare provider for neurological evaluation.',
+    naturalRemedies: 'Gentle movement, avoid repetitive motions, B vitamin supplements.'
+  },
+  // SKIN CONDITIONS
+  {
+    keywords: ['dry skin', 'itchy skin', 'eczema', 'dermatitis', 'scaly skin'],
+    conditions: ['Atopic dermatitis', 'Contact dermatitis', 'Xerosis'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'Moisturize regularly, avoid irritants. See provider if severe.',
+    naturalRemedies: 'Gentle moisturizers, oatmeal baths, avoid harsh soaps, cool compresses.'
+  },
+  // MENTAL HEALTH
+  {
+    keywords: ['depression', 'sad', 'hopeless', 'low mood', 'crying'],
+    conditions: ['Major depression', 'Adjustment disorder', 'Seasonal affective disorder'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'Consider professional counseling. Seek immediate help if suicidal thoughts.',
+    naturalRemedies: 'Regular exercise, sunlight exposure, social support, mindfulness.'
+  },
+  {
+    keywords: ['insomnia', 'trouble sleeping', 'can\'t sleep', 'restless sleep'],
+    conditions: ['Sleep disorder', 'Anxiety', 'Stress', 'Sleep hygiene issues'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'Practice good sleep hygiene. See provider if persistent.',
+    naturalRemedies: 'Regular sleep schedule, limit caffeine, dark room, relaxation techniques.'
   }
 ];

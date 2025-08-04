@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Heart, Clock, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import PricingSection from '@/components/PricingSection';
 
 export default function Landing() {
   const { user } = useAuth();
@@ -172,6 +173,19 @@ export default function Landing() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-4xl">
+          <h3 className="text-3xl font-bold text-center mb-4">
+            Choose Your Plan
+          </h3>
+          <p className="text-center text-muted-foreground mb-12">
+            Get started for free or unlock premium features
+          </p>
+          <PricingSection />
         </div>
       </section>
 
