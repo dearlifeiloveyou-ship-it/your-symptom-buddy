@@ -48,29 +48,80 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: false
-      }
-    });
+  const supabaseService = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  );
 
-    // Get the authorization header
+  try {
+    // Authenticate user
     const authHeader = req.headers.get('authorization');
-    if (authHeader) {
-      // Set the auth token for this request
-      supabase.auth.setSession({
-        access_token: authHeader.replace('Bearer ', ''),
-        refresh_token: ''
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
       });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: userError } = await supabaseService.auth.getUser(token);
+    if (userError || !userData.user) {
+      return new Response(JSON.stringify({ error: "Invalid authentication" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      });
+    }
+
+    // Check subscription and usage limits
+    const { data: subscriber } = await supabaseService
+      .from('subscribers')
+      .select('*')
+      .eq('user_id', userData.user.id)
+      .single();
+
+    if (!subscriber) {
+      return new Response(JSON.stringify({ error: "User subscription not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      });
+    }
+
+    // Check if user has exceeded monthly limit (free tier)
+    if (!subscriber.subscribed && subscriber.monthly_assessments_used >= subscriber.monthly_assessments_limit) {
+      return new Response(JSON.stringify({ 
+        error: "Monthly assessment limit reached. Please upgrade to continue.",
+        requiresUpgrade: true 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 429,
+      });
+    }
+
+    // Increment usage counter for non-premium users
+    if (!subscriber.subscribed) {
+      await supabaseService
+        .from('subscribers')
+        .update({ monthly_assessments_used: subscriber.monthly_assessments_used + 1 })
+        .eq('user_id', userData.user.id);
     }
 
     const { symptoms, interviewResponses, profileData }: AnalysisRequest = await req.json();
 
+    // Input validation and sanitization
+    if (!symptoms || typeof symptoms !== 'string' || symptoms.trim().length === 0) {
+      return new Response(JSON.stringify({ error: "Valid symptoms description is required" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    // Sanitize input
+    const sanitizedSymptoms = symptoms.trim().substring(0, 1000); // Limit length
+
     console.log('Analyzing symptoms:', { symptoms, interviewResponses, profileData });
 
     // Perform rule-based medical analysis
-    const analysisResult = await performMedicalAnalysis(symptoms, interviewResponses, profileData);
+    const analysisResult = await performMedicalAnalysis(sanitizedSymptoms, interviewResponses, profileData);
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

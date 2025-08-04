@@ -9,6 +9,7 @@ import { Plus, Calendar, TrendingUp, User, Clock, AlertTriangle, BarChart3, Acti
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays, parseISO } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import PricingSection from '@/components/PricingSection';
 
 interface Assessment {
   id: string;
@@ -186,10 +187,11 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-8">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -400,6 +402,18 @@ const Dashboard = () => {
                   )}
                 </div>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="subscription" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Subscription Plans</CardTitle>
+                  <CardDescription>Choose the plan that works best for your health needs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PricingSection />
                 </CardContent>
               </Card>
             </TabsContent>
