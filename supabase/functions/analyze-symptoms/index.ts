@@ -263,7 +263,9 @@ async function performMedicalAnalysis(
   
   // Use the built-in comprehensive symptom database
   const matchedPatterns = searchSymptoms(symptoms);
+  console.log(`Symptom text: "${symptoms}"`);
   console.log(`Total matched patterns: ${matchedPatterns.length}`);
+  console.log('Matched patterns:', matchedPatterns.map(p => ({ keywords: p.keywords, conditions: p.conditions })));
   
   if (matchedPatterns.length === 0) {
     // If no specific patterns match, provide general guidance
@@ -341,15 +343,18 @@ async function performMedicalAnalysis(
 // Comprehensive symptom database functions
 function searchSymptoms(symptomText: string): SymptomPattern[] {
   const normalizedText = symptomText.toLowerCase();
+  console.log(`Searching for: "${normalizedText}"`);
   const matchedPatterns: Array<SymptomPattern & { matchScore: number }> = [];
 
-  COMPREHENSIVE_SYMPTOM_DATABASE.forEach(pattern => {
+  COMPREHENSIVE_SYMPTOM_DATABASE.forEach((pattern, index) => {
     let matchScore = 0;
     let keywordMatches = 0;
+    const matchedKeywords: string[] = [];
 
     pattern.keywords.forEach(keyword => {
       if (normalizedText.includes(keyword.toLowerCase())) {
         keywordMatches++;
+        matchedKeywords.push(keyword);
         if (normalizedText === keyword.toLowerCase()) {
           matchScore += 10;
         } else {
@@ -359,18 +364,40 @@ function searchSymptoms(symptomText: string): SymptomPattern[] {
     });
 
     if (keywordMatches > 0) {
+      console.log(`Pattern ${index} matched with keywords: ${matchedKeywords.join(', ')} (score: ${matchScore})`);
       matchedPatterns.push({ ...pattern, matchScore });
     }
   });
 
-  return matchedPatterns
+  console.log(`Found ${matchedPatterns.length} matching patterns`);
+  const sortedPatterns = matchedPatterns
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, 10)
     .map(({ matchScore, ...pattern }) => pattern);
+  
+  console.log('Top matches:', sortedPatterns.map(p => p.conditions[0]));
+  return sortedPatterns;
 }
 
 // Enhanced comprehensive symptom database with improved accuracy
 const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
+  // BREAST AND REPRODUCTIVE HEALTH SYMPTOMS - HIGH PRIORITY
+  {
+    keywords: ['breast lump', 'lump breast', 'breast mass', 'breast tumor', 'breast growth', 'hard lump breast', 'growing lump breast'],
+    conditions: ['Breast mass requiring evaluation', 'Possible breast cancer', 'Fibroadenoma', 'Breast cyst'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'Seek immediate medical evaluation for any new or growing breast lump. Do not delay - early detection is crucial.',
+    naturalRemedies: 'Do not attempt self-treatment. This requires immediate professional medical evaluation and imaging.'
+  },
+  {
+    keywords: ['breast pain', 'tender breast', 'sore breast', 'breast ache', 'breast tenderness'],
+    conditions: ['Mastitis', 'Hormonal changes', 'Fibrocystic breast changes', 'Breast infection'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'Monitor symptoms and see healthcare provider if pain persists or worsens.',
+    naturalRemedies: 'Supportive bra, warm compress, anti-inflammatory foods, monitor for changes.'
+  },
   // CARDIOVASCULAR & CIRCULATORY SYMPTOMS (R00-R09)
   {
     keywords: ['chest pain', 'heart attack', 'cardiac', 'crushing pain', 'pressure chest', 'angina', 'tight chest', 'squeezing chest'],
