@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          api_results: Json | null
+          conditions: Json | null
+          created_at: string
+          id: string
+          interview_responses: Json | null
+          next_steps: string | null
+          profile_id: string | null
+          symptom_description: string
+          triage_level: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_results?: Json | null
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          interview_responses?: Json | null
+          next_steps?: string | null
+          profile_id?: string | null
+          symptom_description: string
+          triage_level?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_results?: Json | null
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          interview_responses?: Json | null
+          next_steps?: string | null
+          profile_id?: string | null
+          symptom_description?: string
+          triage_level?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       description_templates: {
         Row: {
           category: string
@@ -159,27 +209,36 @@ export type Database = {
         Row: {
           business_name: string | null
           created_at: string
+          date_of_birth: string | null
           email: string | null
           full_name: string | null
           id: string
+          relationship: string | null
+          sex: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           business_name?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          relationship?: string | null
+          sex?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           business_name?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          relationship?: string | null
+          sex?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -250,6 +309,88 @@ export type Database = {
           variables?: string[] | null
         }
         Relationships: []
+      }
+      tracked_factors: {
+        Row: {
+          created_at: string
+          factor_name: string
+          factor_value: string
+          id: string
+          logged_at: string
+          notes: string | null
+          profile_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          factor_name: string
+          factor_value: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          profile_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          factor_name?: string
+          factor_value?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          profile_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracked_factors_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracked_symptoms: {
+        Row: {
+          created_at: string
+          id: string
+          logged_at: string
+          notes: string | null
+          profile_id: string | null
+          severity: number
+          symptom_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          profile_id?: string | null
+          severity: number
+          symptom_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logged_at?: string
+          notes?: string | null
+          profile_id?: string | null
+          severity?: number
+          symptom_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracked_symptoms_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
