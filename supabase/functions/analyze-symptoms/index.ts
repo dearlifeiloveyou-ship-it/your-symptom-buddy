@@ -258,9 +258,133 @@ async function performMedicalAnalysis(
   profile?: any
 ): Promise<TriageResult> {
   
-  console.log("=== NEW SYMPTOM ANALYSIS SYSTEM ===");
+  console.log("=== AI-POWERED SYMPTOM ANALYSIS ===");
   console.log("Analyzing:", symptoms);
   console.log("Responses:", responses);
+  
+  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  
+  if (openAIApiKey) {
+    console.log("Using OpenAI for enhanced symptom analysis");
+    try {
+      return await performAIAnalysis(symptoms, responses, profile, openAIApiKey);
+    } catch (error) {
+      console.error("OpenAI analysis failed, falling back to rule-based:", error);
+      return await performRuleBasedAnalysis(symptoms, responses);
+    }
+  } else {
+    console.log("No OpenAI key found, using rule-based analysis");
+    return await performRuleBasedAnalysis(symptoms, responses);
+  }
+}
+
+async function performAIAnalysis(
+  symptoms: string,
+  responses: Record<string, any>,
+  profile: any,
+  apiKey: string
+): Promise<TriageResult> {
+  
+  // Build context for AI
+  let contextInfo = `Patient Information:
+- Symptoms: ${symptoms}
+- Pain Level: ${responses.pain_level || 'Not specified'}/10
+- Fever: ${responses.fever ? 'Yes' : 'No'}
+- Duration: ${responses.duration || 'Not specified'}
+- Location: ${responses.location || 'Not specified'}`;
+
+  if (profile) {
+    contextInfo += `
+- Age: ${profile.age || 'Not specified'}
+- Sex: ${profile.sex || 'Not specified'}`;
+  }
+
+  const systemPrompt = `You are an experienced medical AI assistant specializing in symptom analysis and triage. Your role is to analyze symptoms and provide structured medical guidance.
+
+CRITICAL INSTRUCTIONS:
+- You are NOT diagnosing - you are providing guidance and triage
+- Always recommend professional medical care when appropriate
+- Focus on evidence-based medicine
+- Consider symptom patterns, severity, and risk factors
+- Provide clear triage levels: low, medium, or high priority
+
+For each analysis, provide:
+1. 1-3 most likely conditions (not diagnoses)
+2. Appropriate triage level
+3. Specific recommendations
+4. Natural remedies when safe and appropriate
+
+RESPONSE FORMAT: You must respond in valid JSON format with this exact structure:
+{
+  "triageLevel": "low|medium|high",
+  "conditions": [
+    {
+      "name": "Condition name",
+      "likelihood": 75,
+      "recommendation": "Specific medical recommendation",
+      "naturalRemedies": "Safe natural remedies if applicable"
+    }
+  ],
+  "actions": "Clear next steps for the patient"
+}
+
+TRIAGE GUIDELINES:
+- HIGH: Emergency symptoms (chest pain, severe bleeding, difficulty breathing, severe head injury)
+- MEDIUM: Concerning symptoms needing prompt care (persistent pain, fever >101°F, unusual changes)
+- LOW: Minor symptoms manageable with self-care (mild cold, minor cuts, mild headache)
+
+Remember: This is guidance only, not medical diagnosis. Always recommend professional care for concerning symptoms.`;
+
+  console.log("Calling OpenAI for symptom analysis...");
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4.1-2025-04-14',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Please analyze these symptoms and provide triage guidance:\n\n${contextInfo}` }
+      ],
+      temperature: 0.3, // Lower temperature for more consistent medical responses
+      max_tokens: 1500,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OpenAI API error:', errorText);
+    throw new Error(`OpenAI API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const aiResponse = data.choices[0].message.content;
+  
+  console.log("OpenAI raw response:", aiResponse);
+
+  try {
+    // Parse the JSON response
+    const analysisResult = JSON.parse(aiResponse);
+    
+    // Validate the response structure
+    if (!analysisResult.triageLevel || !analysisResult.conditions || !analysisResult.actions) {
+      throw new Error('Invalid AI response structure');
+    }
+
+    console.log("AI analysis successful:", analysisResult);
+    return analysisResult;
+    
+  } catch (parseError) {
+    console.error("Failed to parse AI response:", parseError);
+    throw new Error('Invalid AI response format');
+  }
+}
+
+async function performRuleBasedAnalysis(symptoms: string, responses: Record<string, any>): Promise<TriageResult> {
+  console.log("Using rule-based analysis as fallback");
   
   const normalizedSymptoms = symptoms.toLowerCase().trim();
   const matches = findSymptomMatches(normalizedSymptoms, responses);
