@@ -116,6 +116,8 @@ Interview Responses: ${JSON.stringify(responses, null, 2)}
 
 Please provide your analysis as a JSON object.`;
 
+  console.log('Making OpenAI API call with key:', openaiApiKey ? 'Key present' : 'No key found');
+  
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -134,8 +136,12 @@ Please provide your analysis as a JSON object.`;
       }),
     });
 
+    console.log('OpenAI API response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error details:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
