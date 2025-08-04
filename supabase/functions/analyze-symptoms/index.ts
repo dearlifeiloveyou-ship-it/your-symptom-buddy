@@ -397,374 +397,301 @@ function searchSymptoms(symptomText: string): SymptomPattern[] {
   return sortedMatches.map(match => match.pattern);
 }
 
-// Comprehensive symptom database - BREAST SYMPTOMS FIRST FOR PRIORITY
+// COMPREHENSIVE MEDICAL SYMPTOM DATABASE - ALL MAJOR HEALTH CATEGORIES
 const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
-  // === BREAST AND WOMEN'S HEALTH - HIGHEST PRIORITY ===
+  // =================== EMERGENCY CONDITIONS (HIGHEST PRIORITY) ===================
   {
-    keywords: ['breast lump', 'lump in breast', 'breast mass', 'hard lump breast', 'breast tumor', 'breast growth', 'lump breast', 'growing lump', 'breast nodule'],
+    keywords: ['chest pain', 'crushing chest pain', 'heart attack', 'chest pressure', 'squeezing chest', 'tight chest', 'cardiac pain'],
+    conditions: ['Myocardial infarction', 'Angina', 'Acute coronary syndrome'],
+    triageLevel: 'high',
+    likelihood: 95,
+    recommendation: 'EMERGENCY: Call 911 immediately. Do not drive yourself to hospital.',
+    naturalRemedies: 'Do not attempt self-treatment. Call emergency services immediately.'
+  },
+  {
+    keywords: ['shortness of breath', 'can\'t breathe', 'difficulty breathing', 'gasping for air', 'breathing problems', 'dyspnea'],
+    conditions: ['Acute respiratory distress', 'Asthma attack', 'Pulmonary embolism', 'Heart failure'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'EMERGENCY: Seek immediate medical attention for severe breathing difficulties.',
+    naturalRemedies: 'Sit upright, stay calm, use rescue inhaler if available. Call 911 if severe.'
+  },
+  {
+    keywords: ['severe abdominal pain', 'intense stomach pain', 'sharp belly pain', 'appendicitis', 'severe belly pain'],
+    conditions: ['Appendicitis', 'Bowel obstruction', 'Perforated organ', 'Gallbladder emergency'],
+    triageLevel: 'high',
+    likelihood: 85,
+    recommendation: 'EMERGENCY: Seek immediate medical evaluation for severe abdominal pain.',
+    naturalRemedies: 'Do not eat or drink. Go to emergency room immediately.'
+  },
+  {
+    keywords: ['loss of consciousness', 'fainting', 'passed out', 'blackout', 'syncope', 'fainted'],
+    conditions: ['Syncope', 'Cardiac arrhythmia', 'Neurological emergency'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'EMERGENCY: Seek immediate medical care for loss of consciousness.',
+    naturalRemedies: 'Lie flat with legs elevated. Call 911 if recurring or concerning symptoms.'
+  },
+  {
+    keywords: ['severe headache', 'worst headache ever', 'sudden headache', 'thunderclap headache', 'splitting headache'],
+    conditions: ['Possible stroke', 'Subarachnoid hemorrhage', 'Meningitis', 'Severe migraine'],
+    triageLevel: 'high',
+    likelihood: 85,
+    recommendation: 'EMERGENCY: Call 911 for sudden severe headache.',
+    naturalRemedies: 'Do not attempt self-treatment. Seek immediate emergency care.'
+  },
+  {
+    keywords: ['weakness one side', 'facial drooping', 'slurred speech', 'difficulty speaking', 'stroke symptoms'],
+    conditions: ['Stroke', 'TIA (mini-stroke)', 'Neurological emergency'],
+    triageLevel: 'high',
+    likelihood: 95,
+    recommendation: 'EMERGENCY: Call 911 immediately. Possible stroke symptoms.',
+    naturalRemedies: 'Do not attempt self-treatment. Call 911 immediately.'
+  },
+  {
+    keywords: ['coughing blood', 'blood in cough', 'hemoptysis', 'bloody cough'],
+    conditions: ['Serious lung condition', 'Pulmonary embolism', 'Lung infection', 'Tuberculosis'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'URGENT: Seek immediate medical attention for blood in cough.',
+    naturalRemedies: 'Do not suppress cough. Seek immediate medical evaluation.'
+  },
+
+  // =================== WOMEN'S HEALTH & BREAST SYMPTOMS ===================
+  {
+    keywords: ['breast lump', 'lump in breast', 'breast mass', 'hard lump breast', 'breast tumor', 'growing lump', 'breast nodule'],
     conditions: ['Breast mass requiring urgent evaluation', 'Possible breast cancer', 'Fibroadenoma'],
     triageLevel: 'high',
     likelihood: 95,
-    recommendation: 'URGENT: Schedule immediate medical evaluation. Any new or growing breast lump requires prompt professional assessment and imaging.',
-    naturalRemedies: 'Do not delay medical care. This symptom requires immediate professional evaluation and cannot be treated with home remedies.'
+    recommendation: 'URGENT: Schedule immediate medical evaluation. Any breast lump requires prompt assessment.',
+    naturalRemedies: 'Do not delay medical care. This requires immediate professional evaluation.'
   },
   {
-    keywords: ['breast pain', 'sore breast', 'tender breast', 'breast ache', 'breast tenderness', 'painful breast'],
-    conditions: ['Mastitis', 'Hormonal breast changes', 'Fibrocystic breast disease'],
+    keywords: ['breast pain', 'sore breast', 'tender breast', 'breast ache', 'breast tenderness'],
+    conditions: ['Mastitis', 'Hormonal changes', 'Fibrocystic breast disease'],
     triageLevel: 'medium',
     likelihood: 75,
-    recommendation: 'Monitor symptoms and see healthcare provider within 1-2 days if pain persists or worsens.',
-    naturalRemedies: 'Supportive bra, warm or cold compress, over-the-counter pain relief, monitor for changes.'
+    recommendation: 'See healthcare provider if pain persists or worsens.',
+    naturalRemedies: 'Supportive bra, warm compress, over-the-counter pain relief.'
   },
+
+  // =================== NEUROLOGICAL SYMPTOMS ===================
   {
-    keywords: ['chest pain', 'heart attack', 'cardiac', 'crushing pain', 'pressure chest', 'angina', 'tight chest', 'squeezing chest'],
-    conditions: ['Myocardial infarction', 'Angina pectoris', 'Acute coronary syndrome'],
-    triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Call emergency services immediately. Do not drive yourself to hospital.',
-    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
-  },
-  {
-    keywords: ['palpitations', 'heart racing', 'irregular heartbeat', 'heart skipping', 'rapid pulse'],
-    conditions: ['Arrhythmia', 'Atrial fibrillation', 'Tachycardia'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'Monitor symptoms and seek medical evaluation within 24 hours if persistent.',
-    naturalRemedies: 'Deep breathing exercises, avoid caffeine, rest in calm environment.'
-  },
-  {
-    keywords: ['shortness of breath', 'difficulty breathing', 'cannot breathe', 'gasping', 'dyspnea'],
-    conditions: ['Asthma exacerbation', 'Pulmonary embolism', 'Heart failure', 'Pneumonia'],
-    triageLevel: 'high',
-    likelihood: 85,
-    recommendation: 'Seek immediate emergency care for severe breathing difficulties.',
-    naturalRemedies: 'Sit upright, remain calm, use prescribed inhaler if available.'
-  },
-  {
-    keywords: ['severe abdominal pain', 'appendicitis', 'intense stomach pain', 'sharp belly pain'],
-    conditions: ['Appendicitis', 'Bowel obstruction', 'Perforated ulcer', 'Gallstones'],
-    triageLevel: 'high',
+    keywords: ['headache', 'head pain', 'migraine', 'tension headache', 'sinus headache'],
+    conditions: ['Tension headache', 'Migraine', 'Cluster headache', 'Sinus headache'],
+    triageLevel: 'low',
     likelihood: 80,
-    recommendation: 'Seek emergency medical evaluation for severe abdominal pain.',
-    naturalRemedies: 'Avoid food and water until evaluated by medical professional.'
+    recommendation: 'Rest in dark room. See provider if severe or persistent.',
+    naturalRemedies: 'Dark quiet room, cold compress, hydration, rest, over-the-counter pain relief.'
   },
   {
-    keywords: ['fever', 'high temperature', 'hot', 'burning up', 'pyrexia'],
-    conditions: ['Viral infection', 'Bacterial infection', 'Inflammatory condition'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'Monitor temperature, seek care if fever >102°F or persistent >3 days.',
-    naturalRemedies: 'Rest, fluids, cool compresses, elderberry, honey and lemon.'
-  },
-  {
-    keywords: ['headache', 'head pain', 'migraine', 'severe headache'],
-    conditions: ['Migraine', 'Tension headache', 'Cluster headache'],
-    triageLevel: 'medium',
-    likelihood: 70,
-    recommendation: 'Monitor symptoms, seek immediate care for sudden severe headache.',
-    naturalRemedies: 'Dark quiet room, cold compress, hydration, rest.'
-  },
-  {
-    keywords: ['dizziness', 'vertigo', 'lightheaded', 'spinning sensation', 'balance problems'],
+    keywords: ['dizziness', 'vertigo', 'lightheaded', 'spinning sensation', 'balance problems', 'dizzy'],
     conditions: ['Vertigo', 'Inner ear infection', 'Low blood pressure', 'Dehydration'],
     triageLevel: 'low',
-    likelihood: 60,
-    recommendation: 'Avoid sudden movements, stay hydrated, seek care if persistent.',
-    naturalRemedies: 'Sit or lie down, ginger tea, avoid sudden movements, hydration.'
-  },
-  {
-    keywords: ['nausea', 'vomiting', 'throwing up', 'feeling sick', 'queasy'],
-    conditions: ['Gastroenteritis', 'Food poisoning', 'Migraine', 'Pregnancy'],
-    triageLevel: 'low',
-    likelihood: 60,
-    recommendation: 'Rest, clear fluids, seek care if persistent vomiting or dehydration signs.',
-    naturalRemedies: 'Ginger tea, small sips of water, BRAT diet, rest.'
-  },
-  {
-    keywords: ['cough', 'cold', 'congestion', 'runny nose', 'stuffy nose', 'sneezing'],
-    conditions: ['Common cold', 'Upper respiratory infection', 'Viral infection'],
-    triageLevel: 'low',
-    likelihood: 85,
-    recommendation: 'Rest and supportive care. See healthcare provider if symptoms worsen or persist beyond 10 days.',
-    naturalRemedies: 'Rest, honey and lemon tea, steam inhalation, warm salt water gargle, increased fluids.'
-  },
-  {
-    keywords: ['fatigue', 'tired', 'exhausted', 'low energy', 'weakness'],
-    conditions: ['Viral infection', 'Stress', 'Sleep deprivation', 'Nutritional deficiency'],
-    triageLevel: 'low',
-    likelihood: 75,
-    recommendation: 'Ensure adequate rest and nutrition. See healthcare provider if fatigue persists.',
-    naturalRemedies: 'Adequate sleep, balanced nutrition, light exercise, stress management.'
-  },
-  {
-    keywords: ['joint pain', 'arthritis', 'stiff joints', 'swollen joints', 'knee pain'],
-    conditions: ['Arthritis', 'Joint inflammation', 'Gout', 'Injury'],
-    triageLevel: 'low',
-    likelihood: 55,
-    recommendation: 'Rest affected joint, seek care if severe pain or loss of function.',
-    naturalRemedies: 'Ice for acute injury, heat for chronic pain, gentle movement, turmeric.'
-  },
-  {
-    keywords: ['back pain', 'lower back pain', 'spine pain', 'sciatica'],
-    conditions: ['Muscle strain', 'Herniated disc', 'Sciatica', 'Spinal stenosis'],
-    triageLevel: 'low',
-    likelihood: 60,
-    recommendation: 'Rest, gentle movement, seek care if severe or radiating pain.',
-    naturalRemedies: 'Heat therapy, gentle stretching, anti-inflammatory foods, proper posture.'
-  },
-  {
-    keywords: ['rash', 'skin rash', 'hives', 'itchy skin', 'red bumps'],
-    conditions: ['Allergic reaction', 'Eczema', 'Contact dermatitis', 'Viral rash'],
-    triageLevel: 'low',
-    likelihood: 60,
-    recommendation: 'Avoid known irritants, seek care if spreading or accompanied by breathing issues.',
-    naturalRemedies: 'Cool compresses, oatmeal baths, avoid scratching, gentle moisturizers.'
-  },
-  {
-    keywords: ['anxiety', 'panic attack', 'worried', 'stressed', 'nervous'],
-    conditions: ['Anxiety disorder', 'Panic disorder', 'Stress reaction'],
-    triageLevel: 'low',
-    likelihood: 65,
-    recommendation: 'Practice relaxation techniques, seek professional help if persistent.',
-    naturalRemedies: 'Deep breathing, meditation, chamomile tea, regular exercise.'
-  },
-  // Additional comprehensive symptoms
-  {
-    keywords: ['bleeding', 'blood', 'hemorrhage'],
-    conditions: ['Hemorrhage', 'Trauma', 'Bleeding disorder'],
-    triageLevel: 'high',
-    likelihood: 85,
-    recommendation: 'Apply direct pressure and seek emergency care immediately.',
-    naturalRemedies: 'Apply firm pressure to bleeding site and elevate if possible.'
-  },
-  {
-    keywords: ['confusion', 'disoriented', 'memory loss', 'cognitive'],
-    conditions: ['Delirium', 'Dementia', 'Metabolic disorder'],
-    triageLevel: 'medium',
     likelihood: 70,
-    recommendation: 'Seek medical evaluation for cognitive changes.',
-    naturalRemedies: 'Ensure safety, maintain routine, seek professional evaluation.'
+    recommendation: 'Avoid sudden movements. See provider if persistent.',
+    naturalRemedies: 'Sit or lie down, avoid sudden movements, stay hydrated, ginger tea.'
   },
   {
-    keywords: ['seizure', 'convulsions', 'fits'],
-    conditions: ['Epilepsy', 'Febrile seizure', 'Brain injury'],
-    triageLevel: 'high',
-    likelihood: 95,
-    recommendation: 'Call emergency services immediately.',
-    naturalRemedies: 'Ensure safety, turn person on side, do not restrain.'
-  },
-  {
-    keywords: ['urinary', 'urine', 'bladder', 'kidney', 'burning urination', 'frequent urination'],
-    conditions: ['UTI', 'Kidney stones', 'Bladder infection'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'Increase fluid intake and see healthcare provider.',
-    naturalRemedies: 'Cranberry juice, increased water, avoid irritants.'
-  },
-  // GASTROINTESTINAL SYMPTOMS
-  {
-    keywords: ['stomach pain', 'indigestion', 'heartburn', 'acid reflux', 'bloating', 'gas'],
-    conditions: ['GERD', 'Gastritis', 'Peptic ulcer', 'Dyspepsia'],
-    triageLevel: 'low',
-    likelihood: 70,
-    recommendation: 'Monitor symptoms, avoid trigger foods. See provider if persistent.',
-    naturalRemedies: 'Ginger tea, smaller meals, avoid spicy foods, elevate head while sleeping.'
-  },
-  {
-    keywords: ['diarrhea', 'loose stools', 'watery stool', 'stomach bug'],
-    conditions: ['Gastroenteritis', 'Food poisoning', 'IBS', 'Viral infection'],
-    triageLevel: 'low',
-    likelihood: 80,
-    recommendation: 'Stay hydrated, rest. See provider if fever or severe dehydration.',
-    naturalRemedies: 'BRAT diet, electrolyte solutions, probiotics, rest.'
-  },
-  {
-    keywords: ['constipation', 'hard stool', 'difficulty bowel movement', 'straining'],
-    conditions: ['Constipation', 'IBS', 'Dehydration'],
-    triageLevel: 'low',
-    likelihood: 75,
-    recommendation: 'Increase fiber and fluids. See provider if persistent.',
-    naturalRemedies: 'Fiber-rich foods, prunes, adequate water intake, regular exercise.'
-  },
-  // RESPIRATORY SYMPTOMS
-  {
-    keywords: ['wheezing', 'asthma', 'tight breathing', 'chest tightness'],
-    conditions: ['Asthma', 'Bronchitis', 'COPD', 'Allergic reaction'],
-    triageLevel: 'medium',
-    likelihood: 80,
-    recommendation: 'Use rescue inhaler if available. Seek care if breathing difficulty persists.',
-    naturalRemedies: 'Sit upright, use inhaler, avoid triggers, calm breathing techniques.'
-  },
-  {
-    keywords: ['sore throat', 'throat pain', 'scratchy throat', 'swollen throat'],
-    conditions: ['Viral pharyngitis', 'Strep throat', 'Common cold'],
-    triageLevel: 'low',
-    likelihood: 85,
-    recommendation: 'Rest, warm liquids. See provider if severe or fever present.',
-    naturalRemedies: 'Warm salt water gargle, honey and lemon, throat lozenges, rest.'
-  },
-  // NEUROLOGICAL SYMPTOMS
-  {
-    keywords: ['memory loss', 'forgetfulness', 'confusion', 'cognitive decline'],
-    conditions: ['Mild cognitive impairment', 'Dementia', 'Depression', 'Medication side effects'],
-    triageLevel: 'medium',
-    likelihood: 60,
-    recommendation: 'Schedule evaluation with healthcare provider for cognitive assessment.',
-    naturalRemedies: 'Mental exercises, social engagement, regular exercise, adequate sleep.'
-  },
-  {
-    keywords: ['numbness', 'tingling', 'pins and needles', 'limb weakness'],
+    keywords: ['numbness', 'tingling', 'pins and needles', 'limb weakness', 'numb hands', 'numb feet'],
     conditions: ['Peripheral neuropathy', 'Nerve compression', 'Vitamin deficiency'],
     triageLevel: 'medium',
     likelihood: 70,
     recommendation: 'See healthcare provider for neurological evaluation.',
     naturalRemedies: 'Gentle movement, avoid repetitive motions, B vitamin supplements.'
   },
-  // SKIN CONDITIONS
+
+  // =================== RESPIRATORY SYMPTOMS ===================
   {
-    keywords: ['dry skin', 'itchy skin', 'eczema', 'dermatitis', 'scaly skin'],
-    conditions: ['Atopic dermatitis', 'Contact dermatitis', 'Xerosis'],
+    keywords: ['cough', 'persistent cough', 'dry cough', 'productive cough', 'coughing'],
+    conditions: ['Upper respiratory infection', 'Common cold', 'Bronchitis', 'Viral infection'],
+    triageLevel: 'low',
+    likelihood: 85,
+    recommendation: 'Rest and fluids. See provider if persistent beyond 3 weeks.',
+    naturalRemedies: 'Honey and warm water, humidifier, rest, throat lozenges, steam inhalation.'
+  },
+  {
+    keywords: ['sore throat', 'throat pain', 'scratchy throat', 'swollen throat', 'strep throat'],
+    conditions: ['Viral pharyngitis', 'Strep throat', 'Upper respiratory infection'],
     triageLevel: 'low',
     likelihood: 80,
-    recommendation: 'Moisturize regularly, avoid irritants. See provider if severe.',
-    naturalRemedies: 'Gentle moisturizers, oatmeal baths, avoid harsh soaps, cool compresses.'
+    recommendation: 'Rest and warm liquids. See provider if severe or fever present.',
+    naturalRemedies: 'Warm salt water gargle, honey, throat lozenges, rest.'
   },
-  // MENTAL HEALTH
   {
-    keywords: ['depression', 'sad', 'hopeless', 'low mood', 'crying'],
-    conditions: ['Major depression', 'Adjustment disorder', 'Seasonal affective disorder'],
+    keywords: ['wheezing', 'asthma', 'tight breathing', 'chest tightness', 'breathing difficulty'],
+    conditions: ['Asthma', 'Bronchitis', 'COPD', 'Allergic reaction'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'Use rescue inhaler if available. Seek care if breathing difficulty persists.',
+    naturalRemedies: 'Sit upright, use inhaler, avoid triggers, calm breathing techniques.'
+  },
+
+  // =================== GASTROINTESTINAL SYMPTOMS ===================
+  {
+    keywords: ['nausea', 'vomiting', 'throwing up', 'feeling sick', 'queasy', 'sick stomach'],
+    conditions: ['Gastroenteritis', 'Food poisoning', 'Viral infection', 'Motion sickness'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Rest and clear fluids. See provider if persistent vomiting or dehydration.',
+    naturalRemedies: 'Clear fluids, BRAT diet, ginger tea, rest, small sips of water.'
+  },
+  {
+    keywords: ['diarrhea', 'loose stools', 'watery stool', 'stomach bug', 'bowel problems'],
+    conditions: ['Gastroenteritis', 'Food poisoning', 'Viral infection', 'IBS'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'Stay hydrated. See provider if severe dehydration, fever, or blood in stool.',
+    naturalRemedies: 'BRAT diet, electrolyte solutions, probiotics, rest, clear fluids.'
+  },
+  {
+    keywords: ['stomach pain', 'belly ache', 'abdominal discomfort', 'indigestion', 'heartburn', 'acid reflux'],
+    conditions: ['Indigestion', 'Gastritis', 'GERD', 'Food sensitivity'],
+    triageLevel: 'low',
+    likelihood: 70,
+    recommendation: 'Monitor symptoms. Avoid trigger foods. See provider if severe or persistent.',
+    naturalRemedies: 'Bland diet, small meals, avoid spicy foods, antacids, rest.'
+  },
+  {
+    keywords: ['constipation', 'hard stool', 'difficulty bowel movement', 'straining', 'blocked bowels'],
+    conditions: ['Constipation', 'IBS', 'Dehydration', 'Dietary issues'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Increase fiber and fluids. See provider if persistent or severe.',
+    naturalRemedies: 'Fiber-rich foods, prunes, adequate water intake, regular exercise.'
+  },
+
+  // =================== MUSCULOSKELETAL SYMPTOMS ===================
+  {
+    keywords: ['back pain', 'lower back pain', 'spine pain', 'sciatica', 'backache'],
+    conditions: ['Muscle strain', 'Herniated disc', 'Sciatica', 'Spinal stenosis'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Rest and gentle movement. See provider if severe or radiating pain.',
+    naturalRemedies: 'Heat therapy, gentle stretching, proper posture, anti-inflammatory medication.'
+  },
+  {
+    keywords: ['joint pain', 'arthritis', 'stiff joints', 'swollen joints', 'knee pain', 'hip pain'],
+    conditions: ['Arthritis', 'Joint inflammation', 'Injury', 'Gout'],
+    triageLevel: 'low',
+    likelihood: 65,
+    recommendation: 'Rest affected joint. See provider if severe pain or loss of function.',
+    naturalRemedies: 'Ice for acute injury, heat for chronic pain, gentle movement, turmeric.'
+  },
+  {
+    keywords: ['muscle pain', 'muscle ache', 'sore muscles', 'muscle strain', 'pulled muscle'],
+    conditions: ['Muscle strain', 'Overuse injury', 'Viral myalgia', 'Exercise-induced soreness'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'Rest and gentle stretching. See provider if severe or not improving.',
+    naturalRemedies: 'Rest, ice or heat, gentle stretching, anti-inflammatory medication.'
+  },
+
+  // =================== CARDIOVASCULAR SYMPTOMS ===================
+  {
+    keywords: ['palpitations', 'heart racing', 'irregular heartbeat', 'heart skipping', 'rapid pulse'],
+    conditions: ['Arrhythmia', 'Atrial fibrillation', 'Anxiety', 'Caffeine sensitivity'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'Monitor symptoms. See provider if persistent or with chest pain.',
+    naturalRemedies: 'Deep breathing, reduce caffeine, stay hydrated, relaxation techniques.'
+  },
+  {
+    keywords: ['high blood pressure', 'hypertension', 'blood pressure', 'BP high'],
+    conditions: ['Hypertension', 'Cardiovascular disease', 'Stress-related hypertension'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'Monitor regularly. See provider for management and medication adjustment.',
+    naturalRemedies: 'Low sodium diet, regular exercise, stress reduction, weight management.'
+  },
+
+  // =================== GENERAL SYMPTOMS ===================
+  {
+    keywords: ['fever', 'high temperature', 'hot', 'burning up', 'feverish', 'temperature'],
+    conditions: ['Viral infection', 'Bacterial infection', 'Inflammatory condition'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'Monitor temperature. See provider if fever >102°F, persistent >3 days, or with severe symptoms.',
+    naturalRemedies: 'Rest, fluids, cool compresses, fever reducers as directed, light clothing.'
+  },
+  {
+    keywords: ['fatigue', 'tired', 'exhausted', 'low energy', 'weakness', 'always tired'],
+    conditions: ['Viral infection', 'Stress', 'Sleep deprivation', 'Anemia', 'Thyroid disorder'],
+    triageLevel: 'low',
+    likelihood: 70,
+    recommendation: 'Ensure adequate rest. See provider if fatigue persists despite rest.',
+    naturalRemedies: 'Adequate sleep, balanced nutrition, light exercise, stress management.'
+  },
+  {
+    keywords: ['rash', 'skin rash', 'red bumps', 'itchy skin', 'hives', 'skin irritation'],
+    conditions: ['Allergic reaction', 'Contact dermatitis', 'Viral rash', 'Eczema'],
+    triageLevel: 'low',
+    likelihood: 65,
+    recommendation: 'Avoid irritants. See provider if spreading, severe, or with breathing issues.',
+    naturalRemedies: 'Cool compresses, avoid scratching, gentle moisturizers, antihistamines.'
+  },
+  {
+    keywords: ['swollen lymph nodes', 'lumps neck', 'enlarged glands', 'swollen glands', 'neck lumps'],
+    conditions: ['Infection', 'Viral illness', 'Immune response', 'Rarely: lymphoma'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'See healthcare provider if swollen lymph nodes persist beyond 2 weeks.',
+    naturalRemedies: 'Warm compresses, rest, monitor for changes, adequate hydration.'
+  },
+
+  // =================== MENTAL HEALTH SYMPTOMS ===================
+  {
+    keywords: ['anxiety', 'panic attack', 'worried', 'stressed', 'nervous', 'anxious'],
+    conditions: ['Anxiety disorder', 'Panic disorder', 'Stress reaction', 'Generalized anxiety'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'Practice relaxation techniques. Seek professional help if persistent or severe.',
+    naturalRemedies: 'Deep breathing, meditation, regular exercise, social support, limit caffeine.'
+  },
+  {
+    keywords: ['depression', 'sad', 'hopeless', 'low mood', 'depressed', 'down'],
+    conditions: ['Depression', 'Adjustment disorder', 'Mood disorder', 'Seasonal affective disorder'],
     triageLevel: 'medium',
     likelihood: 75,
     recommendation: 'Consider professional counseling. Seek immediate help if suicidal thoughts.',
-    naturalRemedies: 'Regular exercise, sunlight exposure, social support, mindfulness.'
+    naturalRemedies: 'Regular exercise, social support, mindfulness, sunlight exposure, professional counseling.'
   },
   {
-    keywords: ['insomnia', 'trouble sleeping', 'can\'t sleep', 'restless sleep'],
+    keywords: ['insomnia', 'trouble sleeping', 'can\'t sleep', 'restless sleep', 'sleep problems'],
     conditions: ['Sleep disorder', 'Anxiety', 'Stress', 'Sleep hygiene issues'],
     triageLevel: 'low',
     likelihood: 80,
-    recommendation: 'Practice good sleep hygiene. See provider if persistent.',
+    recommendation: 'Practice good sleep hygiene. See provider if persistent sleep problems.',
     naturalRemedies: 'Regular sleep schedule, limit caffeine, dark room, relaxation techniques.'
   },
-  // ADDITIONAL COMPREHENSIVE SYMPTOMS FOR ENHANCED COVERAGE
+
+  // =================== URINARY & KIDNEY SYMPTOMS ===================
   {
-    keywords: ['loss of consciousness', 'fainting', 'blackout', 'syncope', 'passed out'],
-    conditions: ['Vasovagal syncope', 'Cardiac arrhythmia', 'Orthostatic hypotension'],
-    triageLevel: 'high',
-    likelihood: 85,
-    recommendation: 'Seek immediate emergency care for loss of consciousness.',
-    naturalRemedies: 'Lie flat with legs elevated, avoid sudden position changes.'
+    keywords: ['urinary', 'urine', 'bladder', 'kidney', 'burning urination', 'frequent urination', 'UTI'],
+    conditions: ['UTI', 'Kidney stones', 'Bladder infection', 'Urinary tract infection'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'Increase fluid intake and see healthcare provider. Seek urgent care if fever or severe pain.',
+    naturalRemedies: 'Cranberry juice, increased water intake, avoid irritants, proper hygiene.'
   },
+
+  // =================== EYE & VISION SYMPTOMS ===================
   {
-    keywords: ['severe headache', 'worst headache ever', 'thunderclap headache', 'sudden severe head pain'],
-    conditions: ['Subarachnoid hemorrhage', 'Meningitis', 'Severe migraine'],
+    keywords: ['vision changes', 'blurred vision', 'loss of vision', 'double vision', 'seeing spots', 'eye pain'],
+    conditions: ['Vision problems', 'Eye strain', 'Possible retinal issue', 'Migraine with aura'],
     triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Call emergency services immediately for sudden severe headache.',
-    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
+    likelihood: 80,
+    recommendation: 'Seek immediate medical attention for sudden vision changes.',
+    naturalRemedies: 'Do not rub eyes. Rest eyes from screens. Seek professional evaluation.'
   },
+
+  // =================== ALLERGIC REACTIONS ===================
   {
     keywords: ['severe allergic reaction', 'anaphylaxis', 'swelling face', 'difficulty swallowing', 'hives all over'],
     conditions: ['Anaphylaxis', 'Severe allergic reaction', 'Angioedema'],
     triageLevel: 'high',
     likelihood: 95,
-    recommendation: 'Use epinephrine if available and call emergency services immediately.',
-    naturalRemedies: 'Use epinephrine auto-injector, remove allergen, seek immediate emergency care.'
-  },
-  {
-    keywords: ['vision changes', 'blurred vision', 'loss of vision', 'double vision', 'seeing spots'],
-    conditions: ['Retinal detachment', 'Stroke', 'Migraine with aura', 'Eye injury'],
-    triageLevel: 'high',
-    likelihood: 80,
-    recommendation: 'Seek immediate medical attention for sudden vision changes.',
-    naturalRemedies: 'Do not rub eyes, seek immediate professional evaluation.'
-  },
-  {
-    keywords: ['difficulty speaking', 'slurred speech', 'can\'t speak', 'speech problems'],
-    conditions: ['Stroke', 'TIA', 'Neurological disorder'],
-    triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Call emergency services immediately. Possible stroke symptoms.',
-    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
-  },
-  {
-    keywords: ['weakness one side', 'arm weakness', 'leg weakness', 'facial drooping'],
-    conditions: ['Stroke', 'TIA', 'Bell\'s palsy'],
-    triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Call emergency services immediately. Possible stroke symptoms.',
-    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
-  },
-  {
-    keywords: ['sudden weight loss', 'unexplained weight loss', 'losing weight fast'],
-    conditions: ['Cancer', 'Hyperthyroidism', 'Diabetes', 'Malabsorption'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'See healthcare provider for evaluation of unexplained weight loss.',
-    naturalRemedies: 'Monitor weight, maintain nutrition, seek professional evaluation.'
-  },
-  {
-    keywords: ['persistent cough blood', 'coughing blood', 'hemoptysis', 'blood in sputum'],
-    conditions: ['Lung cancer', 'Tuberculosis', 'Pulmonary embolism', 'Bronchitis'],
-    triageLevel: 'high',
-    likelihood: 85,
-    recommendation: 'Seek immediate medical attention for blood in cough.',
-    naturalRemedies: 'Do not suppress cough, seek immediate professional evaluation.'
-  },
-  {
-    keywords: ['swollen lymph nodes', 'lumps neck', 'enlarged glands', 'swollen glands'],
-    conditions: ['Infection', 'Lymphoma', 'Autoimmune disorder'],
-    triageLevel: 'medium',
-    likelihood: 70,
-    recommendation: 'See healthcare provider if swollen lymph nodes persist beyond 2 weeks.',
-    naturalRemedies: 'Warm compresses, rest, monitor for changes.'
-  },
-  {
-    keywords: ['persistent fatigue', 'extreme tiredness', 'chronic fatigue', 'always tired'],
-    conditions: ['Chronic fatigue syndrome', 'Anemia', 'Thyroid disorder', 'Depression'],
-    triageLevel: 'medium',
-    likelihood: 80,
-    recommendation: 'See healthcare provider for evaluation if fatigue persists despite rest.',
-    naturalRemedies: 'Adequate sleep, balanced nutrition, gradual exercise, stress management.'
-  },
-  {
-    keywords: ['night sweats', 'excessive sweating night', 'soaking sweats', 'wake up sweating'],
-    conditions: ['Infection', 'Lymphoma', 'Hormonal changes', 'Hyperthyroidism'],
-    triageLevel: 'medium',
-    likelihood: 70,
-    recommendation: 'See healthcare provider if night sweats persist or worsen.',
-    naturalRemedies: 'Cool sleeping environment, breathable bedding, rule out reversible causes.'
-  },
-  {
-    keywords: ['swelling legs', 'edema', 'puffy ankles', 'leg swelling', 'fluid retention'],
-    conditions: ['Heart failure', 'Kidney disease', 'Venous insufficiency', 'Lymphedema'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'See healthcare provider for evaluation of persistent swelling.',
-    naturalRemedies: 'Elevate legs, reduce salt intake, compression stockings, gentle movement.'
-  },
-  {
-    keywords: ['irregular periods', 'missed periods', 'heavy bleeding', 'menstrual problems'],
-    conditions: ['PCOS', 'Thyroid disorder', 'Pregnancy', 'Hormonal imbalance'],
-    triageLevel: 'low',
-    likelihood: 75,
-    recommendation: 'Track symptoms and see healthcare provider for persistent irregularities.',
-    naturalRemedies: 'Regular exercise, healthy diet, stress management, track cycles.'
-  },
-  {
-    keywords: ['erectile dysfunction', 'ED', 'impotence', 'sexual dysfunction'],
-    conditions: ['Vascular disease', 'Diabetes', 'Psychological factors', 'Medication side effects'],
-    triageLevel: 'low',
-    likelihood: 70,
-    recommendation: 'Discuss with healthcare provider. May indicate underlying health issues.',
-    naturalRemedies: 'Regular exercise, healthy diet, stress reduction, limit alcohol.'
-  },
-  {
-    keywords: ['hair loss', 'balding', 'thinning hair', 'alopecia'],
-    conditions: ['Male pattern baldness', 'Alopecia areata', 'Thyroid disorder', 'Stress'],
-    triageLevel: 'low',
-    likelihood: 80,
-    recommendation: 'See healthcare provider if sudden or patchy hair loss occurs.',
-    naturalRemedies: 'Gentle hair care, balanced nutrition, stress management, scalp massage.'
+    recommendation: 'EMERGENCY: Use epinephrine if available and call 911 immediately.',
+    naturalRemedies: 'Use epinephrine auto-injector if available, remove allergen, call 911 immediately.'
   }
 ];
