@@ -258,28 +258,28 @@ async function performMedicalAnalysis(
   profile?: any
 ): Promise<TriageResult> {
   
-  console.log("Analyzing symptoms text:", symptoms);
+  console.log("=== STARTING SYMPTOM ANALYSIS ===");
+  console.log("Raw symptom input:", symptoms);
   console.log("Interview responses:", responses);
   
-  // Use the built-in comprehensive symptom database
+  // Use the rebuilt symptom matching system
   const matchedPatterns = searchSymptoms(symptoms);
-  console.log(`Symptom text: "${symptoms}"`);
-  console.log(`Total matched patterns: ${matchedPatterns.length}`);
-  console.log('Matched patterns:', matchedPatterns.map(p => ({ keywords: p.keywords, conditions: p.conditions })));
   
   if (matchedPatterns.length === 0) {
-    // If no specific patterns match, provide general guidance
+    console.log("NO PATTERNS MATCHED - Using fallback");
     return {
-      triageLevel: 'low',
+      triageLevel: 'medium',
       conditions: [{
-        name: 'General symptoms',
-        likelihood: 30,
-        recommendation: 'Consider consulting with a healthcare provider for proper evaluation of your symptoms. Monitor your condition and seek care if symptoms worsen or persist.',
-        naturalRemedies: 'Rest, adequate hydration, balanced nutrition, and stress management may help with general wellness.'
+        name: 'Unspecified symptoms requiring evaluation',
+        likelihood: 50,
+        recommendation: 'Your symptoms require professional medical evaluation. Please consult with a healthcare provider for proper assessment.',
+        naturalRemedies: 'Maintain overall health with rest, hydration, and balanced nutrition while seeking professional care.'
       }],
-      actions: 'Schedule a routine consultation with your healthcare provider.'
+      actions: 'Schedule an appointment with your healthcare provider for proper evaluation of your symptoms.'
     };
   }
+
+  console.log(`Using ${matchedPatterns.length} matched patterns for analysis`);
 
   // Factor in interview responses
   let painLevel = responses.pain_level || 0;
@@ -342,63 +342,80 @@ async function performMedicalAnalysis(
 
 // Comprehensive symptom database functions
 function searchSymptoms(symptomText: string): SymptomPattern[] {
-  const normalizedText = symptomText.toLowerCase();
-  console.log(`Searching for: "${normalizedText}"`);
-  const matchedPatterns: Array<SymptomPattern & { matchScore: number }> = [];
+  const normalizedText = symptomText.toLowerCase().trim();
+  console.log(`=== SYMPTOM MATCHING DEBUG ===`);
+  console.log(`Input text: "${symptomText}"`);
+  console.log(`Normalized: "${normalizedText}"`);
+  
+  const matches: Array<{ pattern: SymptomPattern; score: number; matchedKeywords: string[] }> = [];
 
-  COMPREHENSIVE_SYMPTOM_DATABASE.forEach((pattern, index) => {
-    let matchScore = 0;
-    let keywordMatches = 0;
+  // Check each pattern in the database
+  COMPREHENSIVE_SYMPTOM_DATABASE.forEach((pattern, patternIndex) => {
+    let totalScore = 0;
     const matchedKeywords: string[] = [];
 
+    // Check each keyword in the pattern
     pattern.keywords.forEach(keyword => {
-      if (normalizedText.includes(keyword.toLowerCase())) {
-        keywordMatches++;
+      const normalizedKeyword = keyword.toLowerCase().trim();
+      
+      if (normalizedText.includes(normalizedKeyword)) {
         matchedKeywords.push(keyword);
-        if (normalizedText === keyword.toLowerCase()) {
-          matchScore += 10;
+        
+        // Score based on match quality
+        if (normalizedText === normalizedKeyword) {
+          totalScore += 20; // Exact match
+        } else if (normalizedText.startsWith(normalizedKeyword) || normalizedText.endsWith(normalizedKeyword)) {
+          totalScore += 15; // Starts or ends with keyword
         } else {
-          matchScore += 5;
+          totalScore += 10; // Contains keyword
         }
       }
     });
 
-    if (keywordMatches > 0) {
-      console.log(`Pattern ${index} matched with keywords: ${matchedKeywords.join(', ')} (score: ${matchScore})`);
-      matchedPatterns.push({ ...pattern, matchScore });
+    // If we found matches, add to results
+    if (matchedKeywords.length > 0) {
+      console.log(`Pattern ${patternIndex}: "${pattern.conditions[0]}" - Score: ${totalScore}, Keywords: [${matchedKeywords.join(', ')}]`);
+      matches.push({
+        pattern,
+        score: totalScore,
+        matchedKeywords
+      });
     }
   });
 
-  console.log(`Found ${matchedPatterns.length} matching patterns`);
-  const sortedPatterns = matchedPatterns
-    .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, 10)
-    .map(({ matchScore, ...pattern }) => pattern);
-  
-  console.log('Top matches:', sortedPatterns.map(p => p.conditions[0]));
-  return sortedPatterns;
+  // Sort by score and return top matches
+  const sortedMatches = matches
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5); // Return top 5 matches
+
+  console.log(`=== FINAL RESULTS ===`);
+  console.log(`Found ${matches.length} total matches, returning top ${sortedMatches.length}`);
+  sortedMatches.forEach((match, index) => {
+    console.log(`${index + 1}. ${match.pattern.conditions[0]} (Score: ${match.score})`);
+  });
+
+  return sortedMatches.map(match => match.pattern);
 }
 
-// Enhanced comprehensive symptom database with improved accuracy
+// Comprehensive symptom database - BREAST SYMPTOMS FIRST FOR PRIORITY
 const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
-  // BREAST AND REPRODUCTIVE HEALTH SYMPTOMS - HIGH PRIORITY
+  // === BREAST AND WOMEN'S HEALTH - HIGHEST PRIORITY ===
   {
-    keywords: ['breast lump', 'lump breast', 'breast mass', 'breast tumor', 'breast growth', 'hard lump breast', 'growing lump breast'],
-    conditions: ['Breast mass requiring evaluation', 'Possible breast cancer', 'Fibroadenoma', 'Breast cyst'],
+    keywords: ['breast lump', 'lump in breast', 'breast mass', 'hard lump breast', 'breast tumor', 'breast growth', 'lump breast', 'growing lump', 'breast nodule'],
+    conditions: ['Breast mass requiring urgent evaluation', 'Possible breast cancer', 'Fibroadenoma'],
     triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Seek immediate medical evaluation for any new or growing breast lump. Do not delay - early detection is crucial.',
-    naturalRemedies: 'Do not attempt self-treatment. This requires immediate professional medical evaluation and imaging.'
+    likelihood: 95,
+    recommendation: 'URGENT: Schedule immediate medical evaluation. Any new or growing breast lump requires prompt professional assessment and imaging.',
+    naturalRemedies: 'Do not delay medical care. This symptom requires immediate professional evaluation and cannot be treated with home remedies.'
   },
   {
-    keywords: ['breast pain', 'tender breast', 'sore breast', 'breast ache', 'breast tenderness'],
-    conditions: ['Mastitis', 'Hormonal changes', 'Fibrocystic breast changes', 'Breast infection'],
+    keywords: ['breast pain', 'sore breast', 'tender breast', 'breast ache', 'breast tenderness', 'painful breast'],
+    conditions: ['Mastitis', 'Hormonal breast changes', 'Fibrocystic breast disease'],
     triageLevel: 'medium',
     likelihood: 75,
-    recommendation: 'Monitor symptoms and see healthcare provider if pain persists or worsens.',
-    naturalRemedies: 'Supportive bra, warm compress, anti-inflammatory foods, monitor for changes.'
+    recommendation: 'Monitor symptoms and see healthcare provider within 1-2 days if pain persists or worsens.',
+    naturalRemedies: 'Supportive bra, warm or cold compress, over-the-counter pain relief, monitor for changes.'
   },
-  // CARDIOVASCULAR & CIRCULATORY SYMPTOMS (R00-R09)
   {
     keywords: ['chest pain', 'heart attack', 'cardiac', 'crushing pain', 'pressure chest', 'angina', 'tight chest', 'squeezing chest'],
     conditions: ['Myocardial infarction', 'Angina pectoris', 'Acute coronary syndrome'],
