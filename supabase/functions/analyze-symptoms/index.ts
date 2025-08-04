@@ -340,48 +340,94 @@ async function performMedicalAnalysis(
   };
 }
 
-// Comprehensive symptom database functions
+// Completely rebuilt symptom matching system
 function searchSymptoms(symptomText: string): SymptomPattern[] {
-  const text = symptomText.toLowerCase();
+  const text = symptomText.toLowerCase().trim();
   console.log(`Searching for symptoms in: "${text}"`);
   
-  const results: SymptomPattern[] = [];
+  const matches: SymptomPattern[] = [];
   
-  // Simple direct matching - check each symptom pattern
-  for (const pattern of COMPREHENSIVE_SYMPTOM_DATABASE) {
-    for (const keyword of pattern.keywords) {
-      if (text.includes(keyword.toLowerCase())) {
-        console.log(`MATCHED: "${keyword}" in "${text}" -> ${pattern.conditions[0]}`);
-        results.push(pattern);
-        break; // Found a match for this pattern, move to next
+  // Check each pattern in the database
+  for (const pattern of SYMPTOM_DATABASE) {
+    // Check if any keyword matches
+    const hasMatch = pattern.keywords.some(keyword => {
+      const keywordLower = keyword.toLowerCase();
+      const isMatch = text.includes(keywordLower);
+      if (isMatch) {
+        console.log(`MATCH FOUND: "${keywordLower}" in "${text}"`);
       }
+      return isMatch;
+    });
+    
+    if (hasMatch) {
+      matches.push(pattern);
     }
   }
   
-  console.log(`Found ${results.length} matching symptoms`);
-  return results.slice(0, 3); // Return top 3 matches
+  console.log(`Found ${matches.length} matching symptoms`);
+  return matches.slice(0, 3); // Return top 3 matches
 }
 
-// Simple, accurate symptom database
-const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
-  // Breast symptoms
+// Comprehensive symptom database - rebuilt from scratch
+const SYMPTOM_DATABASE: SymptomPattern[] = [
+  // Gynecological symptoms
   {
-    keywords: ['breast lump', 'lump breast', 'breast mass', 'lump'],
-    conditions: ['Breast mass requiring evaluation'],
-    triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'See a healthcare provider immediately for any new breast lump.',
-    naturalRemedies: 'Seek professional medical evaluation without delay.'
+    keywords: ['vagina', 'vaginal', 'discharge', 'yeast infection', 'itch', 'burning', 'smell', 'odor'],
+    conditions: ['Vaginal infection or inflammation'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'See healthcare provider for proper diagnosis and treatment of vaginal symptoms.',
+    naturalRemedies: 'Wear cotton underwear, avoid douching, maintain good hygiene.'
   },
   
-  // Chest pain
+  // Urinary symptoms  
   {
-    keywords: ['chest pain', 'heart attack', 'chest pressure'],
-    conditions: ['Possible heart condition'],
-    triageLevel: 'high',
+    keywords: ['urine', 'burning', 'painful urination', 'uti', 'bladder'],
+    conditions: ['Urinary tract infection'],
+    triageLevel: 'medium',
     likelihood: 85,
-    recommendation: 'Call emergency services for severe chest pain.',
-    naturalRemedies: 'Do not delay emergency care for chest pain.'
+    recommendation: 'See healthcare provider for urine testing and antibiotic treatment if needed.',
+    naturalRemedies: 'Drink plenty of water, cranberry juice, avoid irritants.'
+  },
+  
+  // Respiratory symptoms
+  {
+    keywords: ['cough', 'shortness of breath', 'difficulty breathing', 'wheeze'],
+    conditions: ['Respiratory condition'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'Monitor breathing. Seek immediate care if severe difficulty breathing.',
+    naturalRemedies: 'Rest, humidifier, warm liquids, avoid smoke.'
+  },
+  
+  // Pain symptoms
+  {
+    keywords: ['pain', 'ache', 'hurt', 'sore', 'sharp pain', 'dull pain'],
+    conditions: ['Pain requiring evaluation'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'Evaluate pain level and location. Seek care for severe or persistent pain.',
+    naturalRemedies: 'Rest, ice or heat therapy, over-the-counter pain relief as appropriate.'
+  },
+  
+  // Digestive symptoms
+  {
+    keywords: ['nausea', 'vomit', 'stomach', 'belly', 'diarrhea', 'constipation'],
+    conditions: ['Digestive issue'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Stay hydrated. See provider if symptoms persist or worsen.',
+    naturalRemedies: 'BRAT diet, clear fluids, rest, probiotics.'
+  },
+  
+  // Fever and infection
+  {
+    keywords: ['fever', 'temperature', 'chills', 'infection', 'sick'],
+    conditions: ['Infection or illness'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'Monitor temperature. See provider for high fever or if symptoms worsen.',
+    naturalRemedies: 'Rest, fluids, fever reducers as directed by provider.'
   },
   
   // Headache
@@ -389,78 +435,38 @@ const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
     keywords: ['headache', 'head pain', 'migraine'],
     conditions: ['Headache'],
     triageLevel: 'low',
-    likelihood: 75,
-    recommendation: 'Rest in a dark room and stay hydrated.',
-    naturalRemedies: 'Cold compress, rest, over-the-counter pain relief.'
-  },
-  
-  // Breathing issues
-  {
-    keywords: ['shortness of breath', 'difficulty breathing', 'can\'t breathe'],
-    conditions: ['Respiratory distress'],
-    triageLevel: 'high',
-    likelihood: 85,
-    recommendation: 'Seek immediate medical attention for breathing problems.',
-    naturalRemedies: 'Sit upright, stay calm, seek emergency care if severe.'
-  },
-  
-  // Stomach issues
-  {
-    keywords: ['stomach pain', 'nausea', 'vomiting', 'belly pain'],
-    conditions: ['Gastrointestinal issue'],
-    triageLevel: 'medium',
     likelihood: 70,
-    recommendation: 'Rest and clear fluids. See provider if severe or persistent.',
-    naturalRemedies: 'BRAT diet, ginger tea, stay hydrated.'
+    recommendation: 'Rest in quiet, dark room. See provider for severe or frequent headaches.',
+    naturalRemedies: 'Cold compress, rest, hydration, over-the-counter pain relief.'
   },
   
-  // Fever
+  // Skin issues
   {
-    keywords: ['fever', 'high temperature', 'hot'],
-    conditions: ['Infection or inflammatory condition'],
-    triageLevel: 'medium',
-    likelihood: 80,
-    recommendation: 'Monitor temperature. See provider if >102°F or persistent.',
-    naturalRemedies: 'Rest, fluids, fever reducers as directed.'
-  },
-  
-  // Cough
-  {
-    keywords: ['cough', 'coughing'],
-    conditions: ['Upper respiratory infection'],
-    triageLevel: 'low',
-    likelihood: 85,
-    recommendation: 'Rest and fluids. See provider if persistent beyond 3 weeks.',
-    naturalRemedies: 'Honey, warm tea, humidifier, rest.'
-  },
-  
-  // Back pain
-  {
-    keywords: ['back pain', 'lower back pain'],
-    conditions: ['Musculoskeletal pain'],
-    triageLevel: 'low',
-    likelihood: 70,
-    recommendation: 'Rest and gentle movement. See provider if severe.',
-    naturalRemedies: 'Heat therapy, gentle stretching, proper posture.'
-  },
-  
-  // Fatigue
-  {
-    keywords: ['tired', 'fatigue', 'exhausted'],
-    conditions: ['Fatigue'],
+    keywords: ['rash', 'skin', 'red', 'swelling', 'bump'],
+    conditions: ['Skin condition'],
     triageLevel: 'low',
     likelihood: 65,
-    recommendation: 'Ensure adequate rest. See provider if persistent.',
-    naturalRemedies: 'Adequate sleep, balanced nutrition, light exercise.'
+    recommendation: 'Keep area clean and dry. See provider if spreading or infected.',
+    naturalRemedies: 'Gentle cleansing, avoid irritants, moisturize if appropriate.'
   },
   
-  // Anxiety
+  // Chest symptoms
   {
-    keywords: ['anxiety', 'panic', 'worried', 'stressed'],
-    conditions: ['Anxiety or stress reaction'],
+    keywords: ['chest pain', 'heart', 'chest pressure'],
+    conditions: ['Chest pain requiring immediate evaluation'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'Seek emergency care immediately for any chest pain.',
+    naturalRemedies: 'Call emergency services - do not delay care for chest pain.'
+  },
+  
+  // Mental health
+  {
+    keywords: ['anxiety', 'depression', 'panic', 'stress', 'worried'],
+    conditions: ['Mental health concern'],
     triageLevel: 'medium',
-    likelihood: 70,
-    recommendation: 'Practice relaxation techniques. Seek help if persistent.',
-    naturalRemedies: 'Deep breathing, meditation, regular exercise.'
+    likelihood: 75,
+    recommendation: 'Consider speaking with a mental health professional or primary care provider.',
+    naturalRemedies: 'Deep breathing, exercise, adequate sleep, support from friends/family.'
   }
 ];
