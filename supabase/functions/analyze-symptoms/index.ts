@@ -181,7 +181,7 @@ async function performMedicalAnalysis(
       naturalRemedies: 'Rest, hydration, peppermint or lavender oil, cold/warm compress, magnesium supplement.'
     },
     {
-      keywords: ['cough', 'cold', 'congestion', 'runny nose'],
+      keywords: ['cough', 'cold', 'congestion', 'runny nose', 'running nose', 'stuffy nose', 'sneezing', 'nasal'],
       conditions: ['Common cold', 'Upper respiratory infection', 'Viral infection'],
       triageLevel: 'low',
       likelihood: 85,
@@ -205,17 +205,35 @@ async function performMedicalAnalysis(
       naturalRemedies: 'Cool compresses, oatmeal baths, aloe vera, avoid irritants, loose clothing.'
     },
     {
-      keywords: ['sore throat', 'throat pain'],
+      keywords: ['sore throat', 'throat pain', 'throat hurts', 'throat hurt'],
       conditions: ['Viral pharyngitis', 'Strep throat', 'Cold'],
       triageLevel: 'low',
       likelihood: 75,
       recommendation: 'Rest and supportive care. See healthcare provider if severe or persists more than 5 days.',
       naturalRemedies: 'Warm salt water gargle, honey and lemon tea, throat lozenges, steam inhalation.'
+    },
+    {
+      keywords: ['itchy eyes', 'eye irritation', 'watery eyes', 'allergies', 'allergy'],
+      conditions: ['Allergic conjunctivitis', 'Seasonal allergies', 'Environmental allergies'],
+      triageLevel: 'low',
+      likelihood: 80,
+      recommendation: 'Avoid known allergens. See healthcare provider if symptoms persist or worsen.',
+      naturalRemedies: 'Cool compresses, artificial tears, avoid allergens, air purifiers, nasal saline rinse.'
+    },
+    {
+      keywords: ['vaginal burning', 'vaginal burn', 'vagina burns', 'vaginal odor', 'vaginal smell', 'vaginal discharge'],
+      conditions: ['Vaginal infection', 'Yeast infection', 'Bacterial vaginosis'],
+      triageLevel: 'medium',
+      likelihood: 75,
+      recommendation: 'See healthcare provider for proper diagnosis and treatment of vaginal symptoms.',
+      naturalRemedies: 'Wear cotton underwear, avoid douching, maintain good hygiene, probiotics, avoid irritants.'
     }
   ];
 
   // Analyze symptoms and responses
   const symptomsLower = symptoms.toLowerCase();
+  console.log('Analyzing symptoms text:', symptomsLower);
+  
   const matchedPatterns: SymptomPattern[] = [];
   
   // Check for keyword matches in symptoms
@@ -224,9 +242,12 @@ async function performMedicalAnalysis(
       symptomsLower.includes(keyword.toLowerCase())
     );
     if (hasMatch) {
+      console.log('Matched pattern:', pattern.conditions[0], 'for keywords:', pattern.keywords);
       matchedPatterns.push(pattern);
     }
   }
+  
+  console.log('Total matched patterns:', matchedPatterns.length);
 
   // Factor in interview responses
   let painLevel = responses.pain_level || 0;
