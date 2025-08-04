@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, Clock, Download, Save, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { generatePDFReport } from '@/utils/pdfGenerator';
 
 interface Condition {
   name: string;
@@ -19,6 +20,8 @@ interface TriageResult {
   message: string;
   nextSteps: string[];
   conditions: Condition[];
+  severity_score?: number;
+  recommendations?: string[];
 }
 
 const mockResults: TriageResult = {
@@ -52,7 +55,8 @@ const mockResults: TriageResult = {
 const Results = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [results] = useState<TriageResult>(mockResults);
+  const [results, setResults] = useState<TriageResult | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -60,6 +64,21 @@ const Results = () => {
     if (!assessmentData) {
       navigate('/profile-selection');
       return;
+    }
+
+    try {
+      const data = JSON.parse(assessmentData);
+      if (data.analysisResults) {
+        setResults(data.analysisResults);
+      } else {
+        // Fallback to mock data if no analysis results
+        setResults(mockResults);
+      }
+    } catch (error) {
+      console.error('Error parsing assessment data:', error);
+      setResults(mockResults);
+    } finally {
+      setLoading(false);
     }
   }, [navigate]);
 
@@ -100,14 +119,34 @@ const Results = () => {
     }
   };
 
-  const triageConfig = getTriageConfig(results.level);
-  const TriageIcon = triageConfig.icon;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg">No results available</p>
+          <Button onClick={() => navigate('/profile-selection')} className="mt-4">
+            Start New Assessment
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveAssessment = async () => {
     if (!user) {
       toast.error('Please sign in to save your assessment');
       return;
     }
+
+    if (!results) return;
 
     setIsSaving(true);
     try {
@@ -123,7 +162,8 @@ const Results = () => {
           conditions: JSON.stringify(results.conditions),
           next_steps: results.nextSteps.join('\n'),
           api_results: {
-            confidence_scores: results.conditions.map(c => c.confidence),
+            severity_score: results.severity_score,
+            recommendations: results.recommendations,
             analysis_timestamp: new Date().toISOString()
           }
         });
@@ -139,6 +179,27 @@ const Results = () => {
       setIsSaving(false);
     }
   };
+
+  const handleGeneratePDF = () => {
+    try {
+      const assessmentData = JSON.parse(localStorage.getItem('currentAssessment') || '{}');
+      if (results) {
+        generatePDFReport({
+          symptoms: assessmentData.symptoms || '',
+          interviewResponses: assessmentData.interviewResponses || {},
+          profileData: assessmentData.profileData,
+          analysisResults: results
+        }, user?.email);
+        toast.success('PDF report generated and downloaded!');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF report.');
+    }
+  };
+
+  const triageConfig = getTriageConfig(results.level);
+  const TriageIcon = triageConfig.icon;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
@@ -241,12 +302,12 @@ const Results = () => {
             )}
             
             <Button
-              onClick={() => window.print()}
+              onClick={handleGeneratePDF}
               variant="outline"
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Print/Save PDF
+              Download PDF Report
             </Button>
             
             <Button

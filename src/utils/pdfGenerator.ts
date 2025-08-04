@@ -1,0 +1,169 @@
+import jsPDF from 'jspdf';
+
+interface AssessmentData {
+  symptoms: string;
+  interviewResponses: Record<string, any>;
+  profileData?: {
+    age?: string;
+    sex?: string;
+    profileType: string;
+  };
+  analysisResults: {
+    level: string;
+    message: string;
+    nextSteps: string[];
+    conditions: Array<{
+      name: string;
+      confidence: number;
+      description: string;
+    }>;
+    severity_score?: number;
+    recommendations?: string[];
+  };
+}
+
+export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: string) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+  const margin = 20;
+  let currentY = 20;
+
+  // Helper function to add text with word wrapping
+  const addText = (text: string, fontSize: number = 12, isBold: boolean = false) => {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+    
+    const lines = doc.splitTextToSize(text, pageWidth - 2 * margin);
+    doc.text(lines, margin, currentY);
+    currentY += lines.length * (fontSize * 0.4) + 5;
+    
+    return currentY;
+  };
+
+  const addSection = (title: string, content: string) => {
+    currentY += 10;
+    addText(title, 14, true);
+    addText(content, 12, false);
+  };
+
+  // Header
+  doc.setFillColor(41, 128, 185);
+  doc.rect(0, 0, pageWidth, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MDSDR.com Health Assessment Report', margin, 20);
+  
+  currentY = 50;
+  doc.setTextColor(0, 0, 0);
+
+  // Generated date
+  addText(`Generated: ${new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}`, 10);
+
+  if (userEmail) {
+    addText(`Patient: ${userEmail}`, 10);
+  }
+
+  // Demographics
+  if (assessmentData.profileData) {
+    currentY += 5;
+    addText('Patient Demographics', 14, true);
+    if (assessmentData.profileData.age) {
+      addText(`Age: ${assessmentData.profileData.age}`, 12);
+    }
+    if (assessmentData.profileData.sex) {
+      addText(`Sex: ${assessmentData.profileData.sex}`, 12);
+    }
+    addText(`Assessment Type: ${assessmentData.profileData.profileType}`, 12);
+  }
+
+  // Symptom Description
+  addSection('Chief Complaint / Symptoms', assessmentData.symptoms);
+
+  // Interview Responses
+  if (Object.keys(assessmentData.interviewResponses).length > 0) {
+    currentY += 10;
+    addText('Additional Information', 14, true);
+    
+    Object.entries(assessmentData.interviewResponses).forEach(([key, value]) => {
+      const questionMap: Record<string, string> = {
+        fever: 'Fever or feeling feverish',
+        pain_level: 'Pain level (1-10)',
+        duration: 'Symptom duration',
+        location: 'Location of symptoms'
+      };
+      
+      const question = questionMap[key] || key;
+      const answer = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value.toString();
+      addText(`${question}: ${answer}`, 12);
+    });
+  }
+
+  // Triage Level
+  currentY += 10;
+  addText('Assessment Results', 14, true);
+  addText(`Triage Level: ${assessmentData.analysisResults.level.toUpperCase()}`, 12, true);
+  addText(assessmentData.analysisResults.message, 12);
+
+  if (assessmentData.analysisResults.severity_score) {
+    addText(`Severity Score: ${assessmentData.analysisResults.severity_score}/10`, 12);
+  }
+
+  // Possible Conditions
+  if (assessmentData.analysisResults.conditions.length > 0) {
+    currentY += 10;
+    addText('Possible Conditions', 14, true);
+    
+    assessmentData.analysisResults.conditions.forEach((condition, index) => {
+      addText(`${index + 1}. ${condition.name} (${condition.confidence}% confidence)`, 12, true);
+      addText(`   ${condition.description}`, 11);
+    });
+  }
+
+  // Recommendations
+  if (assessmentData.analysisResults.nextSteps.length > 0) {
+    currentY += 10;
+    addText('Recommended Next Steps', 14, true);
+    
+    assessmentData.analysisResults.nextSteps.forEach((step, index) => {
+      addText(`${index + 1}. ${step}`, 12);
+    });
+  }
+
+  if (assessmentData.analysisResults.recommendations && assessmentData.analysisResults.recommendations.length > 0) {
+    currentY += 10;
+    addText('Additional Recommendations', 14, true);
+    
+    assessmentData.analysisResults.recommendations.forEach((rec, index) => {
+      addText(`• ${rec}`, 12);
+    });
+  }
+
+  // Medical Disclaimer
+  currentY += 20;
+  doc.setDrawColor(255, 193, 7);
+  doc.setLineWidth(1);
+  doc.rect(margin - 5, currentY - 5, pageWidth - 2 * margin + 10, 60);
+  
+  addText('IMPORTANT MEDICAL DISCLAIMER', 12, true);
+  addText('This assessment is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. The information provided should not be used for diagnosing or treating a health problem or disease. Always consult with a qualified healthcare provider for proper medical evaluation and treatment. In case of a medical emergency, call 911 immediately.', 10);
+  
+  addText('This report was generated by MDSDR.com automated symptom assessment system and should be reviewed by a healthcare professional.', 10);
+
+  // Footer
+  const pageHeight = doc.internal.pageSize.height;
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  doc.text('© 2024 MDSDR.com - Confidential Medical Information', margin, pageHeight - 10);
+  doc.text(`Page 1 of 1`, pageWidth - margin - 20, pageHeight - 10);
+
+  // Save the PDF
+  const fileName = `MDSDR-Assessment-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+};

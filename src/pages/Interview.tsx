@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Question {
   id: string;
@@ -80,19 +81,29 @@ const Interview = () => {
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      // Update localStorage with interview responses
       const assessmentData = JSON.parse(localStorage.getItem('currentAssessment') || '{}');
+      
+      // Call the medical analysis API
+      const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
+        body: {
+          symptoms: assessmentData.symptoms || '',
+          interviewResponses: responses,
+          profileData: assessmentData.profileData
+        }
+      });
+
+      if (error) throw error;
+
+      // Update localStorage with API results
       assessmentData.interviewResponses = responses;
+      assessmentData.analysisResults = data;
       assessmentData.step = 'results';
       localStorage.setItem('currentAssessment', JSON.stringify(assessmentData));
       
-      // Simulate API processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       navigate('/results');
     } catch (error) {
-      toast.error('There was an error processing your responses. Please try again.');
-      console.error('Interview completion error:', error);
+      console.error('Analysis error:', error);
+      toast.error('There was an error analyzing your symptoms. Please try again.');
     } finally {
       setIsLoading(false);
     }

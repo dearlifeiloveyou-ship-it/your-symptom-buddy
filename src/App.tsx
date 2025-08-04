@@ -12,6 +12,9 @@ import Interview from "./pages/Interview";
 import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
 import TrackSymptoms from "./pages/TrackSymptoms";
+import Disclaimer from "./pages/Disclaimer";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
             <Route path="/results" element={<Results />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/track-symptoms" element={<TrackSymptoms />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
