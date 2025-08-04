@@ -63,7 +63,8 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in customer-portal", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    // Don't expose internal error details to prevent information leakage
+    return new Response(JSON.stringify({ error: "Failed to create customer portal session" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

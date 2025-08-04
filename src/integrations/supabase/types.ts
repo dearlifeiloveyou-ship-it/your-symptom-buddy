@@ -244,6 +244,51 @@ export type Database = {
         }
         Relationships: []
       }
+      subscribers: {
+        Row: {
+          assessment_limit_reset_date: string
+          created_at: string
+          email: string
+          id: string
+          monthly_assessments_limit: number
+          monthly_assessments_used: number
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assessment_limit_reset_date?: string
+          created_at?: string
+          email: string
+          id?: string
+          monthly_assessments_limit?: number
+          monthly_assessments_used?: number
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assessment_limit_reset_date?: string
+          created_at?: string
+          email?: string
+          id?: string
+          monthly_assessments_limit?: number
+          monthly_assessments_used?: number
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       symptom_checks: {
         Row: {
           created_at: string
@@ -397,7 +442,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_monthly_assessments: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

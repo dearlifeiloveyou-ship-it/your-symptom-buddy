@@ -128,9 +128,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in analyze-symptoms function:', error);
+    // Don't expose internal error details to prevent information leakage
     return new Response(JSON.stringify({ 
-      error: 'Failed to analyze symptoms',
-      details: error.message 
+      error: 'An error occurred while analyzing symptoms. Please try again.'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
