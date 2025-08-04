@@ -134,63 +134,57 @@ serve(async (req) => {
       });
     }
 
-    // Authenticate user
+    // Check for authentication (optional for anonymous access)
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
+    let userData = null;
+    let isAuthenticated = false;
+
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: userResponse, error: userError } = await supabaseService.auth.getUser(token);
+      if (!userError && userResponse.user) {
+        userData = userResponse;
+        isAuthenticated = true;
+      }
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: userError } = await supabaseService.auth.getUser(token);
-    if (userError || !userData.user) {
-      return new Response(JSON.stringify({ error: "Invalid authentication" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
-    }
+    // For authenticated users, check subscription and usage limits
+    if (isAuthenticated && userData) {
+      // User-specific rate limiting
+      if (isRateLimited(`user_${userData.user.id}`, 5, 600000)) { // 5 requests per 10 minutes per user
+        return new Response(JSON.stringify({ error: 'User rate limit exceeded. Please wait before making another request.' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429,
+        });
+      }
 
-    // User-specific rate limiting
-    if (isRateLimited(`user_${userData.user.id}`, 5, 600000)) { // 5 requests per 10 minutes per user
-      return new Response(JSON.stringify({ error: 'User rate limit exceeded. Please wait before making another request.' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 429,
-      });
-    }
-
-    // Check subscription and usage limits
-    const { data: subscriber } = await supabaseService
-      .from('subscribers')
-      .select('*')
-      .eq('user_id', userData.user.id)
-      .single();
-
-    if (!subscriber) {
-      return new Response(JSON.stringify({ error: "User subscription not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 403,
-      });
-    }
-
-    // Check if user has exceeded monthly limit (free tier)
-    if (!subscriber.subscribed && subscriber.monthly_assessments_used >= subscriber.monthly_assessments_limit) {
-      return new Response(JSON.stringify({ 
-        error: "Monthly assessment limit reached. Please upgrade to continue.",
-        requiresUpgrade: true 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 429,
-      });
-    }
-
-    // Increment usage counter for non-premium users
-    if (!subscriber.subscribed) {
-      await supabaseService
+      // Check subscription and usage limits
+      const { data: subscriber } = await supabaseService
         .from('subscribers')
-        .update({ monthly_assessments_used: subscriber.monthly_assessments_used + 1 })
-        .eq('user_id', userData.user.id);
+        .select('*')
+        .eq('user_id', userData.user.id)
+        .single();
+
+      if (subscriber) {
+        // Check if user has exceeded monthly limit (free tier)
+        if (!subscriber.subscribed && subscriber.monthly_assessments_used >= subscriber.monthly_assessments_limit) {
+          return new Response(JSON.stringify({ 
+            error: "Monthly assessment limit reached. Please upgrade to continue.",
+            requiresUpgrade: true 
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+          });
+        }
+
+        // Increment usage counter for non-premium users
+        if (!subscriber.subscribed) {
+          await supabaseService
+            .from('subscribers')
+            .update({ monthly_assessments_used: subscriber.monthly_assessments_used + 1 })
+            .eq('user_id', userData.user.id);
+        }
+      }
     }
 
     const requestBody = await req.json();
@@ -215,27 +209,29 @@ serve(async (req) => {
 
     const sanitizedSymptoms = sanitizeInput(symptoms);
 
-    console.log('Analyzing symptoms for authenticated user:', { userId: userData.user.id });
+    console.log('Analyzing symptoms for user:', { 
+      userId: isAuthenticated ? userData?.user.id : 'anonymous',
+      isAuthenticated 
+    });
 
-    // Store assessment in database with sanitized data
-    const { error: insertError } = await supabaseService
-      .from('assessments')
-      .insert({
-        user_id: userData.user.id,
-        symptom_description: sanitizedSymptoms,
-        interview_responses: interviewResponses,
-        api_results: null, // Will be updated after analysis
-        conditions: [],
-        triage_level: 'green',
-        next_steps: 'Analyzing...'
-      });
+    // Store assessment in database only for authenticated users
+    if (isAuthenticated && userData) {
+      const { error: insertError } = await supabaseService
+        .from('assessments')
+        .insert({
+          user_id: userData.user.id,
+          symptom_description: sanitizedSymptoms,
+          interview_responses: interviewResponses,
+          api_results: null, // Will be updated after analysis
+          conditions: [],
+          triage_level: 'green',
+          next_steps: 'Analyzing...'
+        });
 
-    if (insertError) {
-      console.error('Error storing assessment:', insertError);
-      return new Response(JSON.stringify({ error: 'Failed to store assessment data' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      });
+      if (insertError) {
+        console.error('Error storing assessment:', insertError);
+        // Don't fail the request if storage fails, continue with analysis
+      }
     }
 
     // Perform rule-based medical analysis
