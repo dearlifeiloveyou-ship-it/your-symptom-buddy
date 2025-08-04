@@ -343,70 +343,70 @@ async function performMedicalAnalysis(
 // Comprehensive symptom database functions
 function searchSymptoms(symptomText: string): SymptomPattern[] {
   const normalizedText = symptomText.toLowerCase().trim();
-  console.log(`=== SYMPTOM MATCHING DEBUG ===`);
-  console.log(`Input text: "${symptomText}"`);
-  console.log(`Normalized: "${normalizedText}"`);
+  console.log(`=== SYMPTOM SEARCH DEBUG ===`);
+  console.log(`Original input: "${symptomText}"`);
+  console.log(`Normalized text: "${normalizedText}"`);
   
-  const matches: Array<{ pattern: SymptomPattern; score: number; matchedKeywords: string[] }> = [];
+  const matches: Array<{ pattern: SymptomPattern; score: number; matchedWords: string[] }> = [];
 
-  // Check each pattern in the database
-  COMPREHENSIVE_SYMPTOM_DATABASE.forEach((pattern, patternIndex) => {
-    let totalScore = 0;
-    const matchedKeywords: string[] = [];
+  // Simple, reliable keyword matching
+  COMPREHENSIVE_SYMPTOM_DATABASE.forEach((pattern, index) => {
+    let score = 0;
+    const matchedWords: string[] = [];
 
-    // Check each keyword in the pattern
+    // Check each keyword
     pattern.keywords.forEach(keyword => {
       const normalizedKeyword = keyword.toLowerCase().trim();
       
+      // Simple contains check - very reliable
       if (normalizedText.includes(normalizedKeyword)) {
-        matchedKeywords.push(keyword);
-        
-        // Score based on match quality
-        if (normalizedText === normalizedKeyword) {
-          totalScore += 20; // Exact match
-        } else if (normalizedText.startsWith(normalizedKeyword) || normalizedText.endsWith(normalizedKeyword)) {
-          totalScore += 15; // Starts or ends with keyword
-        } else {
-          totalScore += 10; // Contains keyword
-        }
+        matchedWords.push(keyword);
+        score += 10;
+        console.log(`✓ MATCH: "${keyword}" found in "${normalizedText}"`);
       }
     });
 
-    // If we found matches, add to results
-    if (matchedKeywords.length > 0) {
-      console.log(`Pattern ${patternIndex}: "${pattern.conditions[0]}" - Score: ${totalScore}, Keywords: [${matchedKeywords.join(', ')}]`);
+    // If any keywords matched, add to results
+    if (score > 0) {
       matches.push({
         pattern,
-        score: totalScore,
-        matchedKeywords
+        score,
+        matchedWords
       });
+      console.log(`Pattern ${index}: ${pattern.conditions[0]} - Score: ${score} - Matched: [${matchedWords.join(', ')}]`);
     }
   });
 
-  // Sort by score and return top matches
-  const sortedMatches = matches
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5); // Return top 5 matches
+  console.log(`=== SEARCH RESULTS ===`);
+  console.log(`Total patterns checked: ${COMPREHENSIVE_SYMPTOM_DATABASE.length}`);
+  console.log(`Patterns with matches: ${matches.length}`);
 
-  console.log(`=== FINAL RESULTS ===`);
-  console.log(`Found ${matches.length} total matches, returning top ${sortedMatches.length}`);
-  sortedMatches.forEach((match, index) => {
+  if (matches.length === 0) {
+    console.log(`❌ NO MATCHES FOUND for "${normalizedText}"`);
+    return [];
+  }
+
+  // Sort by score (highest first)
+  const sortedMatches = matches.sort((a, b) => b.score - a.score);
+  
+  console.log(`=== TOP MATCHES ===`);
+  sortedMatches.slice(0, 3).forEach((match, index) => {
     console.log(`${index + 1}. ${match.pattern.conditions[0]} (Score: ${match.score})`);
   });
 
-  return sortedMatches.map(match => match.pattern);
+  return sortedMatches.slice(0, 3).map(match => match.pattern);
 }
 
-// COMPREHENSIVE MEDICAL SYMPTOM DATABASE - ALL MAJOR HEALTH CATEGORIES
+// MEDICAL SYMPTOM DATABASE - BREAST SYMPTOMS FIRST FOR TESTING
 const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
-  // =================== EMERGENCY CONDITIONS (HIGHEST PRIORITY) ===================
+  // === BREAST SYMPTOMS - ABSOLUTE FIRST PRIORITY ===
   {
-    keywords: ['chest pain', 'crushing chest pain', 'heart attack', 'chest pressure', 'squeezing chest', 'tight chest', 'cardiac pain'],
-    conditions: ['Myocardial infarction', 'Angina', 'Acute coronary syndrome'],
+    keywords: ['breast lump', 'lump in breast', 'breast mass', 'lump breast', 'hard lump', 'breast', 'lump'],
+    conditions: ['Breast mass requiring immediate evaluation'],
     triageLevel: 'high',
     likelihood: 95,
-    recommendation: 'EMERGENCY: Call 911 immediately. Do not drive yourself to hospital.',
-    naturalRemedies: 'Do not attempt self-treatment. Call emergency services immediately.'
+    recommendation: 'URGENT: Schedule immediate medical evaluation for any breast lump.',
+    naturalRemedies: 'Do not delay medical care. Seek immediate professional evaluation.'
   },
   {
     keywords: ['shortness of breath', 'can\'t breathe', 'difficulty breathing', 'gasping for air', 'breathing problems', 'dyspnea'],
