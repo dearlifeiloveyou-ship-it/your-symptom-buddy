@@ -25,6 +25,7 @@ interface Condition {
   name: string;
   likelihood: number;
   recommendation: string;
+  naturalRemedies: string;
 }
 
 interface TriageResult {
@@ -49,7 +50,11 @@ serve(async (req) => {
     // Get the authorization header
     const authHeader = req.headers.get('authorization');
     if (authHeader) {
-      supabase.auth.setAuth(authHeader.replace('Bearer ', ''));
+      // Set the auth token for this request
+      supabase.auth.setSession({
+        access_token: authHeader.replace('Bearer ', ''),
+        refresh_token: ''
+      });
     }
 
     const { symptoms, interviewResponses, profileData }: AnalysisRequest = await req.json();
@@ -90,11 +95,14 @@ IMPORTANT DISCLAIMERS:
 - You are not a replacement for professional medical advice
 - In case of emergency, always advise calling emergency services
 - Encourage users to consult healthcare providers for proper diagnosis
+- Natural remedies are complementary and should not replace professional medical care
 
 Please analyze the provided symptoms and interview responses, then respond with a JSON object containing:
 - triageLevel: "low", "medium", or "high" urgency
-- conditions: array of possible conditions with name, likelihood (0-100%), and brief recommendation
+- conditions: array of possible conditions with name, likelihood (0-100%), brief recommendation, and naturalRemedies (home/natural remedies that may provide comfort)
 - actions: summary of recommended next steps
+
+For natural remedies, suggest safe, evidence-based home treatments like rest, hydration, heat/cold therapy, herbal teas, or gentle exercises. Always emphasize these are complementary to medical care.
 
 Be conservative in your assessment and prioritize user safety.`;
 
@@ -116,13 +124,13 @@ Please provide your analysis as a JSON object.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 1000,
+        max_tokens: 1500,
       }),
     });
 
@@ -153,7 +161,8 @@ Please provide your analysis as a JSON object.`;
         {
           name: 'Unable to analyze',
           likelihood: 50,
-          recommendation: 'Please consult with a healthcare provider for proper evaluation'
+          recommendation: 'Please consult with a healthcare provider for proper evaluation',
+          naturalRemedies: 'Rest, stay hydrated, and monitor symptoms closely'
         }
       ],
       actions: 'We recommend consulting with a healthcare provider for a proper evaluation of your symptoms.'

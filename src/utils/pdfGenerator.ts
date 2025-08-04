@@ -15,6 +15,7 @@ interface AssessmentData {
       name: string;
       likelihood: number;
       recommendation: string;
+      naturalRemedies?: string;
     }>;
   };
 }
@@ -114,7 +115,11 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
     
     assessmentData.analysisResults.conditions.forEach((condition, index) => {
       addText(`${index + 1}. ${condition.name} (${condition.likelihood}% likelihood)`, 12, true);
-      addText(`   ${condition.recommendation}`, 11);
+      addText(`   Medical Recommendation: ${condition.recommendation}`, 11);
+      if (condition.naturalRemedies) {
+        addText(`   Natural Remedies: ${condition.naturalRemedies}`, 11);
+      }
+      currentY += 3;
     });
   }
 

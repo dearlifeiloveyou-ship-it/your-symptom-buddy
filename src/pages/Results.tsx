@@ -13,6 +13,7 @@ interface Condition {
   name: string;
   likelihood: number;
   recommendation: string;
+  naturalRemedies?: string;
 }
 
 interface TriageResult {
@@ -237,6 +238,16 @@ const Results = () => {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{condition.recommendation}</p>
+                  {condition.naturalRemedies && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <h5 className="text-sm font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+                        <span>🌿</span> Natural Remedies
+                      </h5>
+                      <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                        {condition.naturalRemedies}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </CardContent>
