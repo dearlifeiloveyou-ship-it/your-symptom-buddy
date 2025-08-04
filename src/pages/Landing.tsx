@@ -16,6 +16,20 @@ export default function Landing() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">MDSDR.com</h1>
+          
+          {/* Navigation */}
+          <nav className="hidden md:flex space-x-6">
+            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </Link>
+            <Link to="/symptom-library" className="text-muted-foreground hover:text-foreground transition-colors">
+              Symptom Library
+            </Link>
+            <Link to="/trust" className="text-muted-foreground hover:text-foreground transition-colors">
+              Trust & Security
+            </Link>
+          </nav>
+
           <div className="space-x-4">
             {user ? (
               <Button asChild>
@@ -39,11 +53,11 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Your Trusted Health Companion
+            Your Partner in Health and Wellbeing
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            Get clear, empathetic health guidance with our AI-powered symptom checker. 
-            Bridge the gap between acute care and chronic condition management.
+            We're here to support you through every health concern with empathetic, AI-powered guidance. 
+            Because your health journey deserves a companion who truly understands and cares about your wellbeing.
           </p>
           <div className="space-x-4">
             <Button 
@@ -86,9 +100,9 @@ export default function Landing() {
                 <CardTitle>Empathetic Care</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
-                  Designed to reduce anxiety and provide clear, compassionate health guidance
-                </CardDescription>
+              <CardDescription>
+                Your health journey shouldn't feel overwhelming. We provide clear, compassionate guidance that puts your mind at ease.
+              </CardDescription>
               </CardContent>
             </Card>
             
@@ -98,9 +112,9 @@ export default function Landing() {
                 <CardTitle>Trusted & Secure</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
-                  HIPAA-compliant platform with encrypted data and privacy-first design
-                </CardDescription>
+              <CardDescription>
+                Your trust is sacred to us. Enterprise-grade security, HIPAA compliance, and radical data privacy protect what matters most.
+              </CardDescription>
               </CardContent>
             </Card>
             
@@ -110,9 +124,9 @@ export default function Landing() {
                 <CardTitle>24/7 Available</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
-                  Get immediate health insights anytime, anywhere with our AI-powered system
-                </CardDescription>
+              <CardDescription>
+                Health concerns don't wait for office hours. We're here whenever you need guidance, day or night.
+              </CardDescription>
               </CardContent>
             </Card>
             
@@ -122,9 +136,9 @@ export default function Landing() {
                 <CardTitle>Family Focused</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
-                  Manage health assessments for yourself, your children, and family members
-                </CardDescription>
+              <CardDescription>
+                Because health is a family matter. Support the wellbeing of everyone you care about from one trusted platform.
+              </CardDescription>
               </CardContent>
             </Card>
           </div>
@@ -145,7 +159,7 @@ export default function Landing() {
               <div>
                 <h4 className="text-xl font-semibold mb-2">Describe Your Symptoms</h4>
                 <p className="text-muted-foreground">
-                  Tell us about your health concerns in your own words. Our AI understands natural language.
+                  Share what's on your mind about your health. We listen without judgment and understand your concerns in your own words.
                 </p>
               </div>
             </div>
@@ -157,7 +171,7 @@ export default function Landing() {
               <div>
                 <h4 className="text-xl font-semibold mb-2">Answer Follow-up Questions</h4>
                 <p className="text-muted-foreground">
-                  Our system asks relevant questions to better understand your situation.
+                  We'll gently guide you through questions that help us understand your unique situation and provide better support.
                 </p>
               </div>
             </div>
@@ -169,7 +183,7 @@ export default function Landing() {
               <div>
                 <h4 className="text-xl font-semibold mb-2">Get Clear Guidance</h4>
                 <p className="text-muted-foreground">
-                  Receive color-coded triage recommendations and next steps for your care.
+                  Get clear, actionable guidance tailored to your situation, with gentle direction on the best next steps for your wellbeing.
                 </p>
               </div>
             </div>
@@ -197,6 +211,15 @@ export default function Landing() {
             © 2024 MDSDR.com - Your trusted health companion
           </p>
           <div className="space-x-4">
+            <Link to="/about" className="hover:text-foreground transition-colors">
+              About MDSDR
+            </Link>
+            <Link to="/symptom-library" className="hover:text-foreground transition-colors">
+              Symptom Library
+            </Link>
+            <Link to="/trust" className="hover:text-foreground transition-colors">
+              Trust Framework
+            </Link>
             <Link to="/disclaimer" className="hover:text-foreground transition-colors">
               Medical Disclaimer
             </Link>

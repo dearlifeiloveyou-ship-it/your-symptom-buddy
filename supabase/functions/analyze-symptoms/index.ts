@@ -605,5 +605,126 @@ const COMPREHENSIVE_SYMPTOM_DATABASE: SymptomPattern[] = [
     likelihood: 80,
     recommendation: 'Practice good sleep hygiene. See provider if persistent.',
     naturalRemedies: 'Regular sleep schedule, limit caffeine, dark room, relaxation techniques.'
+  },
+  // ADDITIONAL COMPREHENSIVE SYMPTOMS FOR ENHANCED COVERAGE
+  {
+    keywords: ['loss of consciousness', 'fainting', 'blackout', 'syncope', 'passed out'],
+    conditions: ['Vasovagal syncope', 'Cardiac arrhythmia', 'Orthostatic hypotension'],
+    triageLevel: 'high',
+    likelihood: 85,
+    recommendation: 'Seek immediate emergency care for loss of consciousness.',
+    naturalRemedies: 'Lie flat with legs elevated, avoid sudden position changes.'
+  },
+  {
+    keywords: ['severe headache', 'worst headache ever', 'thunderclap headache', 'sudden severe head pain'],
+    conditions: ['Subarachnoid hemorrhage', 'Meningitis', 'Severe migraine'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'Call emergency services immediately for sudden severe headache.',
+    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
+  },
+  {
+    keywords: ['severe allergic reaction', 'anaphylaxis', 'swelling face', 'difficulty swallowing', 'hives all over'],
+    conditions: ['Anaphylaxis', 'Severe allergic reaction', 'Angioedema'],
+    triageLevel: 'high',
+    likelihood: 95,
+    recommendation: 'Use epinephrine if available and call emergency services immediately.',
+    naturalRemedies: 'Use epinephrine auto-injector, remove allergen, seek immediate emergency care.'
+  },
+  {
+    keywords: ['vision changes', 'blurred vision', 'loss of vision', 'double vision', 'seeing spots'],
+    conditions: ['Retinal detachment', 'Stroke', 'Migraine with aura', 'Eye injury'],
+    triageLevel: 'high',
+    likelihood: 80,
+    recommendation: 'Seek immediate medical attention for sudden vision changes.',
+    naturalRemedies: 'Do not rub eyes, seek immediate professional evaluation.'
+  },
+  {
+    keywords: ['difficulty speaking', 'slurred speech', 'can\'t speak', 'speech problems'],
+    conditions: ['Stroke', 'TIA', 'Neurological disorder'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'Call emergency services immediately. Possible stroke symptoms.',
+    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
+  },
+  {
+    keywords: ['weakness one side', 'arm weakness', 'leg weakness', 'facial drooping'],
+    conditions: ['Stroke', 'TIA', 'Bell\'s palsy'],
+    triageLevel: 'high',
+    likelihood: 90,
+    recommendation: 'Call emergency services immediately. Possible stroke symptoms.',
+    naturalRemedies: 'Do not attempt self-treatment. This requires immediate emergency care.'
+  },
+  {
+    keywords: ['sudden weight loss', 'unexplained weight loss', 'losing weight fast'],
+    conditions: ['Cancer', 'Hyperthyroidism', 'Diabetes', 'Malabsorption'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'See healthcare provider for evaluation of unexplained weight loss.',
+    naturalRemedies: 'Monitor weight, maintain nutrition, seek professional evaluation.'
+  },
+  {
+    keywords: ['persistent cough blood', 'coughing blood', 'hemoptysis', 'blood in sputum'],
+    conditions: ['Lung cancer', 'Tuberculosis', 'Pulmonary embolism', 'Bronchitis'],
+    triageLevel: 'high',
+    likelihood: 85,
+    recommendation: 'Seek immediate medical attention for blood in cough.',
+    naturalRemedies: 'Do not suppress cough, seek immediate professional evaluation.'
+  },
+  {
+    keywords: ['swollen lymph nodes', 'lumps neck', 'enlarged glands', 'swollen glands'],
+    conditions: ['Infection', 'Lymphoma', 'Autoimmune disorder'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'See healthcare provider if swollen lymph nodes persist beyond 2 weeks.',
+    naturalRemedies: 'Warm compresses, rest, monitor for changes.'
+  },
+  {
+    keywords: ['persistent fatigue', 'extreme tiredness', 'chronic fatigue', 'always tired'],
+    conditions: ['Chronic fatigue syndrome', 'Anemia', 'Thyroid disorder', 'Depression'],
+    triageLevel: 'medium',
+    likelihood: 80,
+    recommendation: 'See healthcare provider for evaluation if fatigue persists despite rest.',
+    naturalRemedies: 'Adequate sleep, balanced nutrition, gradual exercise, stress management.'
+  },
+  {
+    keywords: ['night sweats', 'excessive sweating night', 'soaking sweats', 'wake up sweating'],
+    conditions: ['Infection', 'Lymphoma', 'Hormonal changes', 'Hyperthyroidism'],
+    triageLevel: 'medium',
+    likelihood: 70,
+    recommendation: 'See healthcare provider if night sweats persist or worsen.',
+    naturalRemedies: 'Cool sleeping environment, breathable bedding, rule out reversible causes.'
+  },
+  {
+    keywords: ['swelling legs', 'edema', 'puffy ankles', 'leg swelling', 'fluid retention'],
+    conditions: ['Heart failure', 'Kidney disease', 'Venous insufficiency', 'Lymphedema'],
+    triageLevel: 'medium',
+    likelihood: 75,
+    recommendation: 'See healthcare provider for evaluation of persistent swelling.',
+    naturalRemedies: 'Elevate legs, reduce salt intake, compression stockings, gentle movement.'
+  },
+  {
+    keywords: ['irregular periods', 'missed periods', 'heavy bleeding', 'menstrual problems'],
+    conditions: ['PCOS', 'Thyroid disorder', 'Pregnancy', 'Hormonal imbalance'],
+    triageLevel: 'low',
+    likelihood: 75,
+    recommendation: 'Track symptoms and see healthcare provider for persistent irregularities.',
+    naturalRemedies: 'Regular exercise, healthy diet, stress management, track cycles.'
+  },
+  {
+    keywords: ['erectile dysfunction', 'ED', 'impotence', 'sexual dysfunction'],
+    conditions: ['Vascular disease', 'Diabetes', 'Psychological factors', 'Medication side effects'],
+    triageLevel: 'low',
+    likelihood: 70,
+    recommendation: 'Discuss with healthcare provider. May indicate underlying health issues.',
+    naturalRemedies: 'Regular exercise, healthy diet, stress reduction, limit alcohol.'
+  },
+  {
+    keywords: ['hair loss', 'balding', 'thinning hair', 'alopecia'],
+    conditions: ['Male pattern baldness', 'Alopecia areata', 'Thyroid disorder', 'Stress'],
+    triageLevel: 'low',
+    likelihood: 80,
+    recommendation: 'See healthcare provider if sudden or patchy hair loss occurs.',
+    naturalRemedies: 'Gentle hair care, balanced nutrition, stress management, scalp massage.'
   }
 ];

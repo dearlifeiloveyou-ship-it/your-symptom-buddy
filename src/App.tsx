@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import About from "./pages/About";
+import SymptomLibrary from "./pages/SymptomLibrary";
+import Trust from "./pages/Trust";
 import ProfileSelection from "./pages/ProfileSelection";
 import SymptomInput from "./pages/SymptomInput";
 import Interview from "./pages/Interview";
@@ -29,6 +32,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/symptom-library" element={<SymptomLibrary />} />
+            <Route path="/trust" element={<Trust />} />
             <Route path="/profile-selection" element={<ProfileSelection />} />
             <Route path="/symptom-input" element={<SymptomInput />} />
             <Route path="/interview" element={<Interview />} />
