@@ -23,27 +23,6 @@ interface TriageResult {
   actions: string;
 }
 
-const mockResults: TriageResult = {
-  triageLevel: 'medium',
-  actions: 'Based on your symptoms, you should consider seeing a healthcare provider within the next few days. Monitor your symptoms for any worsening, get adequate rest and stay hydrated.',
-  conditions: [
-    {
-      name: 'Tension Headache',
-      likelihood: 85,
-      recommendation: 'Rest, hydration, and over-the-counter pain relief may help'
-    },
-    {
-      name: 'Migraine',
-      likelihood: 65,
-      recommendation: 'Consider a quiet, dark room and consult with a healthcare provider'
-    },
-    {
-      name: 'Sinus Headache',
-      likelihood: 45,
-      recommendation: 'Steam inhalation and decongestants may provide relief'
-    }
-  ]
-};
 
 const Results = () => {
   const navigate = useNavigate();
@@ -53,24 +32,20 @@ const Results = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Clear any stale data first
-    secureStorage.remove('currentAssessment');
-    
     const assessmentData = secureStorage.get('currentAssessment');
     if (!assessmentData) {
-      console.log('No assessment data found, redirecting to start');
       navigate('/profile-selection');
       return;
     }
 
-    console.log('Assessment data found:', assessmentData);
+    console.log('Assessment data:', assessmentData);
     
     try {
       if (assessmentData.analysisResults) {
-        console.log('Loading analysis results:', assessmentData.analysisResults);
+        console.log('Analysis results found:', assessmentData.analysisResults);
         setResults(assessmentData.analysisResults);
       } else {
-        console.log('No analysis results found in assessment data');
+        console.log('No analysis results - redirecting to restart');
         navigate('/profile-selection');
         return;
       }
