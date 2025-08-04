@@ -125,6 +125,34 @@ export default function Auth() {
             </TabsContent>
             
             <TabsContent value="signup">
+              <Tabs defaultValue="free" className="w-full mb-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="free">Free Plan</TabsTrigger>
+                  <TabsTrigger value="premium">Premium Plan</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="free" className="space-y-2 p-4 border rounded-lg">
+                  <h3 className="font-semibold">Free Plan</h3>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• 3 symptom checks per month</li>
+                    <li>• Basic health reports</li>
+                    <li>• Community support</li>
+                  </ul>
+                </TabsContent>
+                
+                <TabsContent value="premium" className="space-y-2 p-4 border rounded-lg border-primary">
+                  <h3 className="font-semibold text-primary">Premium Plan - $9.99/month</h3>
+                  <ul className="text-sm space-y-1">
+                    <li>• Unlimited symptom checks</li>
+                    <li>• Detailed PDF health reports</li>
+                    <li>• Symptom tracking & trends</li>
+                    <li>• Priority support</li>
+                    <li>• Family member profiles</li>
+                    <li>• Export data to doctor</li>
+                  </ul>
+                </TabsContent>
+              </Tabs>
+              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
@@ -163,7 +191,7 @@ export default function Auth() {
                 )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign Up
+                  Sign Up Free
                 </Button>
               </form>
             </TabsContent>
