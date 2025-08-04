@@ -8,6 +8,7 @@ import { AlertTriangle, CheckCircle, Clock, Download, Save, Home } from 'lucide-
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { generatePDFReport } from '@/utils/pdfGenerator';
+import { secureStorage } from '@/lib/security';
 
 interface Condition {
   name: string;
@@ -52,23 +53,25 @@ const Results = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const assessmentData = localStorage.getItem('currentAssessment');
+    const assessmentData = secureStorage.get('currentAssessment');
     if (!assessmentData) {
       navigate('/profile-selection');
       return;
     }
 
     try {
-      const data = JSON.parse(assessmentData);
-      if (data.analysisResults) {
-        setResults(data.analysisResults);
+      if (assessmentData.analysisResults) {
+        setResults(assessmentData.analysisResults);
       } else {
-        // Fallback to mock data if no analysis results
-        setResults(mockResults);
+        // No analysis results found - redirect back to start the process
+        console.log('No analysis results found in assessment data');
+        navigate('/profile-selection');
+        return;
       }
     } catch (error) {
-      console.error('Error parsing assessment data:', error);
-      setResults(mockResults);
+      console.error('Error loading assessment data:', error);
+      navigate('/profile-selection');
+      return;
     } finally {
       setLoading(false);
     }
@@ -146,14 +149,14 @@ const Results = () => {
 
     setIsSaving(true);
     try {
-      const assessmentData = JSON.parse(localStorage.getItem('currentAssessment') || '{}');
+      const assessmentData = secureStorage.get('currentAssessment');
       
       const { error } = await supabase
         .from('assessments')
         .insert({
           user_id: user.id,
-          symptom_description: assessmentData.symptoms || '',
-          interview_responses: assessmentData.interviewResponses || {},
+          symptom_description: assessmentData?.symptoms || '',
+          interview_responses: assessmentData?.interviewResponses || {},
           triage_level: results.triageLevel,
           conditions: JSON.stringify(results.conditions),
           next_steps: results.actions,
@@ -167,7 +170,7 @@ const Results = () => {
       if (error) throw error;
 
       toast.success('Assessment saved successfully!');
-      localStorage.removeItem('currentAssessment');
+      secureStorage.remove('currentAssessment');
     } catch (error) {
       console.error('Error saving assessment:', error);
       toast.error('Failed to save assessment. Please try again.');
@@ -178,8 +181,8 @@ const Results = () => {
 
   const handleGeneratePDF = () => {
     try {
-      const assessmentData = JSON.parse(localStorage.getItem('currentAssessment') || '{}');
-      if (results) {
+      const assessmentData = secureStorage.get('currentAssessment');
+      if (results && assessmentData) {
         generatePDFReport({
           symptoms: assessmentData.symptoms || '',
           interviewResponses: assessmentData.interviewResponses || {},
