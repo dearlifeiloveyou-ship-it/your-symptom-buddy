@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-const medicalApiKey = Deno.env.get('MEDICAL_API_KEY');
+const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
 interface AnalysisRequest {
   symptoms: string;
@@ -23,18 +23,14 @@ interface AnalysisRequest {
 
 interface Condition {
   name: string;
-  confidence: number;
-  description: string;
-  severity: 'low' | 'medium' | 'high';
+  likelihood: number;
+  recommendation: string;
 }
 
 interface TriageResult {
-  level: 'emergency' | 'urgent' | 'routine' | 'self-care';
-  message: string;
-  nextSteps: string[];
+  triageLevel: 'low' | 'medium' | 'high';
   conditions: Condition[];
-  severity_score: number;
-  recommendations: string[];
+  actions: string;
 }
 
 serve(async (req) => {
@@ -83,124 +79,84 @@ async function performMedicalAnalysis(
   responses: Record<string, any>, 
   profile?: any
 ): Promise<TriageResult> {
-  // Mock implementation - replace with actual medical API call
-  // For now, we'll use simple keyword analysis and scoring
-  
-  const lowerSymptoms = symptoms.toLowerCase();
-  let severity_score = 1;
-  let conditions: Condition[] = [];
-  let level: TriageResult['level'] = 'self-care';
-  let message = '';
-  let nextSteps: string[] = [];
-  let recommendations: string[] = [];
-
-  // Emergency keywords
-  const emergencyKeywords = ['chest pain', 'difficulty breathing', 'severe bleeding', 'unconscious', 'stroke', 'heart attack'];
-  const urgentKeywords = ['high fever', 'severe pain', 'infection', 'persistent vomiting'];
-  const routineKeywords = ['headache', 'fatigue', 'mild pain', 'cold symptoms'];
-
-  // Analyze symptom severity
-  if (emergencyKeywords.some(keyword => lowerSymptoms.includes(keyword))) {
-    level = 'emergency';
-    severity_score = 9;
-    message = 'Seek immediate emergency medical attention. Call 911 or go to the nearest emergency room.';
-    nextSteps = [
-      'Call 911 immediately',
-      'Do not drive yourself to the hospital',
-      'Stay calm and follow emergency operator instructions'
-    ];
-    recommendations = ['Emergency care required', 'Do not delay treatment'];
-  } else if (urgentKeywords.some(keyword => lowerSymptoms.includes(keyword))) {
-    level = 'urgent';
-    severity_score = 6;
-    message = 'You should seek medical care within 24 hours. Consider urgent care or contacting your healthcare provider.';
-    nextSteps = [
-      'Contact your healthcare provider today',
-      'Consider urgent care if provider unavailable',
-      'Monitor symptoms for any worsening'
-    ];
-    recommendations = ['Urgent medical evaluation recommended', 'Monitor symptoms closely'];
-  } else if (routineKeywords.some(keyword => lowerSymptoms.includes(keyword))) {
-    level = 'routine';
-    severity_score = 3;
-    message = 'Your symptoms suggest a condition that should be evaluated within a few days.';
-    nextSteps = [
-      'Schedule an appointment with your healthcare provider',
-      'Monitor symptoms and note any changes',
-      'Consider over-the-counter remedies as appropriate'
-    ];
-    recommendations = ['Schedule routine medical consultation', 'Self-care measures may help'];
-  } else {
-    level = 'self-care';
-    severity_score = 1;
-    message = 'Your symptoms may be manageable with self-care measures.';
-    nextSteps = [
-      'Rest and stay hydrated',
-      'Monitor symptoms for any worsening',
-      'Contact healthcare provider if symptoms persist'
-    ];
-    recommendations = ['Self-care measures recommended', 'Monitor for changes'];
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key not configured');
   }
 
-  // Generate likely conditions based on symptoms
-  if (lowerSymptoms.includes('headache')) {
-    conditions.push({
-      name: 'Tension Headache',
-      confidence: 75,
-      description: 'Most common type of headache, often related to stress or muscle tension',
-      severity: severity_score > 5 ? 'high' : 'medium'
+  // Create the system prompt
+  const systemPrompt = `You are an AI-powered symptom triage assistant. Your role is to analyze symptoms and provide medical guidance for triage purposes only. You are not providing a diagnosis, but helping users understand urgency levels and next steps.
+
+IMPORTANT DISCLAIMERS:
+- You are not a replacement for professional medical advice
+- In case of emergency, always advise calling emergency services
+- Encourage users to consult healthcare providers for proper diagnosis
+
+Please analyze the provided symptoms and interview responses, then respond with a JSON object containing:
+- triageLevel: "low", "medium", or "high" urgency
+- conditions: array of possible conditions with name, likelihood (0-100%), and brief recommendation
+- actions: summary of recommended next steps
+
+Be conservative in your assessment and prioritize user safety.`;
+
+  // Format the user prompt
+  const userPrompt = `Patient Information:
+${profile ? `Age: ${profile.age || 'Not specified'}, Sex: ${profile.sex || 'Not specified'}` : 'No demographic information provided'}
+
+Symptoms: ${symptoms}
+
+Interview Responses: ${JSON.stringify(responses, null, 2)}
+
+Please provide your analysis as a JSON object.`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 1000,
+      }),
     });
-    
-    if (responses.fever === true || lowerSymptoms.includes('nausea')) {
-      conditions.push({
-        name: 'Migraine',
-        confidence: 60,
-        description: 'Severe headache often accompanied by nausea and light sensitivity',
-        severity: 'medium'
-      });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
+    console.log('OpenAI response:', content);
+
+    // Parse the JSON response
+    const analysisResult = JSON.parse(content);
+    
+    return {
+      triageLevel: analysisResult.triageLevel,
+      conditions: analysisResult.conditions,
+      actions: analysisResult.actions
+    };
+  } catch (error) {
+    console.error('Error calling OpenAI API:', error);
+    
+    // Fallback response
+    return {
+      triageLevel: 'medium',
+      conditions: [
+        {
+          name: 'Unable to analyze',
+          likelihood: 50,
+          recommendation: 'Please consult with a healthcare provider for proper evaluation'
+        }
+      ],
+      actions: 'We recommend consulting with a healthcare provider for a proper evaluation of your symptoms.'
+    };
   }
-
-  if (lowerSymptoms.includes('fever') || responses.fever === true) {
-    conditions.push({
-      name: 'Viral Infection',
-      confidence: 70,
-      description: 'Common viral illness with fever and systemic symptoms',
-      severity: severity_score > 6 ? 'high' : 'medium'
-    });
-  }
-
-  if (lowerSymptoms.includes('pain')) {
-    const painLevel = responses.pain_level || 5;
-    conditions.push({
-      name: 'Musculoskeletal Pain',
-      confidence: 65,
-      description: 'Pain related to muscles, joints, or bones',
-      severity: painLevel > 7 ? 'high' : painLevel > 4 ? 'medium' : 'low'
-    });
-  }
-
-  // Default condition if no specific match
-  if (conditions.length === 0) {
-    conditions.push({
-      name: 'General Symptoms',
-      confidence: 50,
-      description: 'Non-specific symptoms requiring further evaluation',
-      severity: 'low'
-    });
-  }
-
-  // Sort conditions by confidence
-  conditions.sort((a, b) => b.confidence - a.confidence);
-
-  console.log('Analysis result:', { level, severity_score, conditions: conditions.length });
-
-  return {
-    level,
-    message,
-    nextSteps,
-    conditions,
-    severity_score,
-    recommendations
-  };
 }

@@ -11,43 +11,34 @@ import { generatePDFReport } from '@/utils/pdfGenerator';
 
 interface Condition {
   name: string;
-  confidence: number;
-  description: string;
+  likelihood: number;
+  recommendation: string;
 }
 
 interface TriageResult {
-  level: 'emergency' | 'urgent' | 'routine' | 'self-care';
-  message: string;
-  nextSteps: string[];
+  triageLevel: 'low' | 'medium' | 'high';
   conditions: Condition[];
-  severity_score?: number;
-  recommendations?: string[];
+  actions: string;
 }
 
 const mockResults: TriageResult = {
-  level: 'routine',
-  message: 'Based on your symptoms, you should consider seeing a healthcare provider within the next few days.',
-  nextSteps: [
-    'Monitor your symptoms for any worsening',
-    'Get adequate rest and stay hydrated',
-    'Consider over-the-counter pain relief if needed',
-    'Schedule an appointment with your primary care physician'
-  ],
+  triageLevel: 'medium',
+  actions: 'Based on your symptoms, you should consider seeing a healthcare provider within the next few days. Monitor your symptoms for any worsening, get adequate rest and stay hydrated.',
   conditions: [
     {
       name: 'Tension Headache',
-      confidence: 85,
-      description: 'Most common type of headache, often related to stress or muscle tension'
+      likelihood: 85,
+      recommendation: 'Rest, hydration, and over-the-counter pain relief may help'
     },
     {
       name: 'Migraine',
-      confidence: 65,
-      description: 'Severe headache often accompanied by nausea and light sensitivity'
+      likelihood: 65,
+      recommendation: 'Consider a quiet, dark room and consult with a healthcare provider'
     },
     {
       name: 'Sinus Headache',
-      confidence: 45,
-      description: 'Headache caused by sinus inflammation or infection'
+      likelihood: 45,
+      recommendation: 'Steam inhalation and decongestants may provide relief'
     }
   ]
 };
@@ -84,37 +75,41 @@ const Results = () => {
 
   const getTriageConfig = (level: string) => {
     switch (level) {
-      case 'emergency':
+      case 'high':
         return {
           color: 'destructive',
           icon: AlertTriangle,
           bgColor: 'bg-destructive/10',
           textColor: 'text-destructive',
-          title: 'Seek Emergency Care'
+          title: 'High Priority',
+          message: 'Seek medical care promptly'
         };
-      case 'urgent':
+      case 'medium':
         return {
           color: 'secondary',
           icon: Clock,
           bgColor: 'bg-orange-100 dark:bg-orange-900/20',
           textColor: 'text-orange-700 dark:text-orange-300',
-          title: 'Urgent Care Needed'
+          title: 'Medium Priority',
+          message: 'Consider consulting a healthcare provider'
         };
-      case 'routine':
+      case 'low':
         return {
           color: 'default',
-          icon: Clock,
-          bgColor: 'bg-blue-100 dark:bg-blue-900/20',
-          textColor: 'text-blue-700 dark:text-blue-300',
-          title: 'Routine Care'
+          icon: CheckCircle,
+          bgColor: 'bg-green-100 dark:bg-green-900/20',
+          textColor: 'text-green-700 dark:text-green-300',
+          title: 'Low Priority',
+          message: 'Monitor symptoms and practice self-care'
         };
       default:
         return {
           color: 'secondary',
           icon: CheckCircle,
-          bgColor: 'bg-green-100 dark:bg-green-900/20',
-          textColor: 'text-green-700 dark:text-green-300',
-          title: 'Self-Care'
+          bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+          textColor: 'text-blue-700 dark:text-blue-300',
+          title: 'Assessment Complete',
+          message: 'Consult with a healthcare provider if needed'
         };
     }
   };
@@ -158,12 +153,12 @@ const Results = () => {
           user_id: user.id,
           symptom_description: assessmentData.symptoms || '',
           interview_responses: assessmentData.interviewResponses || {},
-          triage_level: results.level,
+          triage_level: results.triageLevel,
           conditions: JSON.stringify(results.conditions),
-          next_steps: results.nextSteps.join('\n'),
+          next_steps: results.actions,
           api_results: {
-            severity_score: results.severity_score,
-            recommendations: results.recommendations,
+            triageLevel: results.triageLevel,
+            actions: results.actions,
             analysis_timestamp: new Date().toISOString()
           }
         });
@@ -198,7 +193,7 @@ const Results = () => {
     }
   };
 
-  const triageConfig = getTriageConfig(results.level);
+  const triageConfig = getTriageConfig(results.triageLevel);
   const TriageIcon = triageConfig.icon;
 
   return (
@@ -217,7 +212,7 @@ const Results = () => {
                     {triageConfig.title}
                   </CardTitle>
                   <CardDescription className="mt-1">
-                    {results.message}
+                    {triageConfig.message}
                   </CardDescription>
                 </div>
               </div>
@@ -234,38 +229,29 @@ const Results = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {results.conditions.map((condition, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
-                  <div className="flex-1">
+                <div key={index} className="p-4 bg-secondary/30 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
                     <h4 className="font-medium text-primary">{condition.name}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{condition.description}</p>
+                    <Badge variant="secondary">
+                      {condition.likelihood}% likelihood
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="ml-4">
-                    {condition.confidence}% match
-                  </Badge>
+                  <p className="text-sm text-muted-foreground">{condition.recommendation}</p>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          {/* Next Steps */}
+          {/* Recommended Actions */}
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-primary">Recommended Next Steps</CardTitle>
+              <CardTitle className="text-primary">Recommended Actions</CardTitle>
               <CardDescription>
                 Follow these recommendations for the best care
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {results.nextSteps.map((step, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 text-primary text-sm flex items-center justify-center font-medium mt-0.5">
-                      {index + 1}
-                    </div>
-                    <span className="text-sm">{step}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-sm leading-relaxed">{results.actions}</p>
             </CardContent>
           </Card>
 

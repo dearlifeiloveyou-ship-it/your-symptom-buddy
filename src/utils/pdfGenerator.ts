@@ -9,16 +9,13 @@ interface AssessmentData {
     profileType: string;
   };
   analysisResults: {
-    level: string;
-    message: string;
-    nextSteps: string[];
+    triageLevel: string;
+    actions: string;
     conditions: Array<{
       name: string;
-      confidence: number;
-      description: string;
+      likelihood: number;
+      recommendation: string;
     }>;
-    severity_score?: number;
-    recommendations?: string[];
   };
 }
 
@@ -108,12 +105,7 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
   // Triage Level
   currentY += 10;
   addText('Assessment Results', 14, true);
-  addText(`Triage Level: ${assessmentData.analysisResults.level.toUpperCase()}`, 12, true);
-  addText(assessmentData.analysisResults.message, 12);
-
-  if (assessmentData.analysisResults.severity_score) {
-    addText(`Severity Score: ${assessmentData.analysisResults.severity_score}/10`, 12);
-  }
+  addText(`Triage Level: ${assessmentData.analysisResults.triageLevel.toUpperCase()} PRIORITY`, 12, true);
 
   // Possible Conditions
   if (assessmentData.analysisResults.conditions.length > 0) {
@@ -121,29 +113,15 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
     addText('Possible Conditions', 14, true);
     
     assessmentData.analysisResults.conditions.forEach((condition, index) => {
-      addText(`${index + 1}. ${condition.name} (${condition.confidence}% confidence)`, 12, true);
-      addText(`   ${condition.description}`, 11);
+      addText(`${index + 1}. ${condition.name} (${condition.likelihood}% likelihood)`, 12, true);
+      addText(`   ${condition.recommendation}`, 11);
     });
   }
 
   // Recommendations
-  if (assessmentData.analysisResults.nextSteps.length > 0) {
-    currentY += 10;
-    addText('Recommended Next Steps', 14, true);
-    
-    assessmentData.analysisResults.nextSteps.forEach((step, index) => {
-      addText(`${index + 1}. ${step}`, 12);
-    });
-  }
-
-  if (assessmentData.analysisResults.recommendations && assessmentData.analysisResults.recommendations.length > 0) {
-    currentY += 10;
-    addText('Additional Recommendations', 14, true);
-    
-    assessmentData.analysisResults.recommendations.forEach((rec, index) => {
-      addText(`• ${rec}`, 12);
-    });
-  }
+  currentY += 10;
+  addText('Recommended Actions', 14, true);
+  addText(assessmentData.analysisResults.actions, 12);
 
   // Medical Disclaimer
   currentY += 20;
