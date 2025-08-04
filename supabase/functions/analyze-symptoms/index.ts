@@ -258,215 +258,230 @@ async function performMedicalAnalysis(
   profile?: any
 ): Promise<TriageResult> {
   
-  console.log("=== STARTING SYMPTOM ANALYSIS ===");
-  console.log("Raw symptom input:", symptoms);
-  console.log("Interview responses:", responses);
+  console.log("=== NEW SYMPTOM ANALYSIS SYSTEM ===");
+  console.log("Analyzing:", symptoms);
+  console.log("Responses:", responses);
   
-  // Use the rebuilt symptom matching system
-  const matchedPatterns = searchSymptoms(symptoms);
+  const normalizedSymptoms = symptoms.toLowerCase().trim();
+  const matches = findSymptomMatches(normalizedSymptoms, responses);
   
-  if (matchedPatterns.length === 0) {
-    console.log("NO PATTERNS MATCHED - Using fallback");
-    return {
-      triageLevel: 'medium',
-      conditions: [{
-        name: 'Unspecified symptoms requiring evaluation',
-        likelihood: 50,
-        recommendation: 'Your symptoms require professional medical evaluation. Please consult with a healthcare provider for proper assessment.',
-        naturalRemedies: 'Maintain overall health with rest, hydration, and balanced nutrition while seeking professional care.'
-      }],
-      actions: 'Schedule an appointment with your healthcare provider for proper evaluation of your symptoms.'
-    };
-  }
-
-  console.log(`Using ${matchedPatterns.length} matched patterns for analysis`);
-
-  // Factor in interview responses
-  let painLevel = responses.pain_level || 0;
-  let hasFever = responses.fever || false;
-  let duration = responses.duration || '';
-
-  // Determine final triage level
-  let finalTriageLevel: 'low' | 'medium' | 'high' = 'low';
+  console.log(`Found ${matches.length} condition matches`);
   
-  if (matchedPatterns.length > 0) {
-    const highestTriage = matchedPatterns.reduce((highest, pattern) => {
-      if (pattern.triageLevel === 'high') return 'high';
-      if (pattern.triageLevel === 'medium' && highest !== 'high') return 'medium';
-      return highest;
-    }, 'low' as 'low' | 'medium' | 'high');
-    
-    finalTriageLevel = highestTriage;
+  if (matches.length === 0) {
+    console.log("No specific conditions identified");
+    return createGenericResult(normalizedSymptoms, responses);
   }
 
-  // Escalate based on pain level
-  if (painLevel >= 8) {
-    finalTriageLevel = 'high';
-  } else if (painLevel >= 6) {
-    finalTriageLevel = finalTriageLevel === 'low' ? 'medium' : finalTriageLevel;
-  }
-
-  // Escalate based on fever
-  if (hasFever && finalTriageLevel === 'low') {
-    finalTriageLevel = 'medium';
-  }
-
-  // Build conditions array from matched patterns
-  const conditions: Condition[] = matchedPatterns.map(pattern => ({
-    name: pattern.conditions[0],
-    likelihood: pattern.likelihood,
-    recommendation: pattern.recommendation,
-    naturalRemedies: pattern.naturalRemedies
-  }));
-
-  // Determine actions based on triage level
-  let actions: string;
-  switch (finalTriageLevel) {
-    case 'high':
-      actions = 'Seek emergency medical attention immediately. Do not delay care for potentially serious symptoms.';
-      break;
-    case 'medium':
-      actions = 'Schedule an appointment with your healthcare provider within 24-48 hours. Monitor symptoms closely.';
-      break;
-    case 'low':
-      actions = 'Practice self-care and monitor symptoms. Contact healthcare provider if symptoms worsen or persist beyond expected timeframe.';
-      break;
-  }
-
+  // Sort by likelihood and take top matches
+  const sortedMatches = matches.sort((a, b) => b.likelihood - a.likelihood).slice(0, 3);
+  
+  // Determine triage level based on highest priority match and responses
+  const triageLevel = calculateTriageLevel(sortedMatches, responses);
+  
+  console.log(`Final triage: ${triageLevel}`);
+  
   return {
-    triageLevel: finalTriageLevel,
-    conditions,
-    actions
+    triageLevel,
+    conditions: sortedMatches,
+    actions: getActionsForTriage(triageLevel)
   };
 }
 
-// Completely rebuilt symptom matching system
-function searchSymptoms(symptomText: string): SymptomPattern[] {
-  const text = symptomText.toLowerCase().trim();
-  console.log(`Searching for symptoms in: "${text}"`);
+// New intelligent symptom matching system
+function findSymptomMatches(symptoms: string, responses: Record<string, any>): Condition[] {
+  const matches: Condition[] = [];
   
-  const matches: SymptomPattern[] = [];
+  console.log("Analyzing symptoms:", symptoms);
   
-  // Check each pattern in the database
-  for (const pattern of SYMPTOM_DATABASE) {
-    // Check if any keyword matches
-    const hasMatch = pattern.keywords.some(keyword => {
-      const keywordLower = keyword.toLowerCase();
-      const isMatch = text.includes(keywordLower);
-      if (isMatch) {
-        console.log(`MATCH FOUND: "${keywordLower}" in "${text}"`);
-      }
-      return isMatch;
-    });
-    
-    if (hasMatch) {
-      matches.push(pattern);
+  // Male genital conditions
+  if (symptoms.includes('testicle') || symptoms.includes('testical') || symptoms.includes('testicles') || symptoms.includes('testicals')) {
+    if (symptoms.includes('lump') || symptoms.includes('mass') || symptoms.includes('swelling') || symptoms.includes('growth')) {
+      matches.push({
+        name: 'Testicular lump or mass',
+        likelihood: 85,
+        recommendation: 'Testicular lumps require immediate medical evaluation to rule out serious conditions including cancer. Schedule urgent appointment with healthcare provider.',
+        naturalRemedies: 'Do not delay medical care. Avoid self-treatment for testicular lumps.'
+      });
+    }
+    if (symptoms.includes('pain') || symptoms.includes('ache') || symptoms.includes('hurt')) {
+      matches.push({
+        name: 'Testicular pain',
+        likelihood: 80,
+        recommendation: 'Testicular pain can indicate various conditions from infection to torsion. Seek medical evaluation promptly.',
+        naturalRemedies: 'Apply ice pack, wear supportive underwear, avoid heavy lifting while seeking medical care.'
+      });
     }
   }
-  
-  console.log(`Found ${matches.length} matching symptoms`);
-  return matches.slice(0, 3); // Return top 3 matches
+
+  // Female genital conditions
+  if (symptoms.includes('vagina') || symptoms.includes('vaginal') || symptoms.includes('vulva')) {
+    if (symptoms.includes('discharge') || symptoms.includes('smell') || symptoms.includes('odor')) {
+      matches.push({
+        name: 'Vaginal discharge with odor',
+        likelihood: 82,
+        recommendation: 'Abnormal vaginal discharge may indicate infection. See healthcare provider for proper diagnosis and treatment.',
+        naturalRemedies: 'Wear cotton underwear, avoid douching, maintain good hygiene.'
+      });
+    }
+    if (symptoms.includes('itch') || symptoms.includes('burning') || symptoms.includes('irritation')) {
+      matches.push({
+        name: 'Vaginal irritation',
+        likelihood: 78,
+        recommendation: 'Vaginal itching or burning may indicate yeast infection or other conditions. Consult healthcare provider.',
+        naturalRemedies: 'Avoid scented products, wear loose clothing, consider probiotics.'
+      });
+    }
+  }
+
+  // Breast conditions
+  if (symptoms.includes('breast') || symptoms.includes('boob') || symptoms.includes('chest')) {
+    if (symptoms.includes('lump') || symptoms.includes('mass') || symptoms.includes('growth')) {
+      matches.push({
+        name: 'Breast lump',
+        likelihood: 88,
+        recommendation: 'Any new breast lump should be evaluated by a healthcare provider promptly to rule out serious conditions.',
+        naturalRemedies: 'Do not delay medical evaluation. Continue regular breast self-exams.'
+      });
+    }
+  }
+
+  // Respiratory conditions
+  if (symptoms.includes('cough') || symptoms.includes('shortness') || symptoms.includes('breathing') || symptoms.includes('wheeze')) {
+    matches.push({
+      name: 'Respiratory symptoms',
+      likelihood: 75,
+      recommendation: 'Monitor breathing difficulty. Seek immediate care if severe shortness of breath.',
+      naturalRemedies: 'Rest, use humidifier, stay hydrated, avoid smoke and irritants.'
+    });
+  }
+
+  // Gastrointestinal
+  if (symptoms.includes('nausea') || symptoms.includes('vomit') || symptoms.includes('stomach') || symptoms.includes('diarrhea')) {
+    matches.push({
+      name: 'Gastrointestinal upset',
+      likelihood: 72,
+      recommendation: 'Stay hydrated. See provider if symptoms persist more than 2-3 days or if severe.',
+      naturalRemedies: 'BRAT diet, clear fluids, rest, electrolyte replacement.'
+    });
+  }
+
+  // Pain conditions
+  if (symptoms.includes('pain') || symptoms.includes('ache') || symptoms.includes('hurt')) {
+    let painLikelihood = 70;
+    if (responses.pain_level >= 7) painLikelihood = 85;
+    
+    matches.push({
+      name: 'Pain condition',
+      likelihood: painLikelihood,
+      recommendation: 'Evaluate pain severity and location. Seek care for severe or persistent pain.',
+      naturalRemedies: 'Rest, ice or heat therapy, over-the-counter pain relief as appropriate.'
+    });
+  }
+
+  // Skin conditions
+  if (symptoms.includes('rash') || symptoms.includes('skin') || symptoms.includes('red') || symptoms.includes('bump')) {
+    matches.push({
+      name: 'Skin condition',
+      likelihood: 68,
+      recommendation: 'Keep area clean and dry. See provider if spreading, infected, or not improving.',
+      naturalRemedies: 'Gentle cleansing, avoid irritants, moisturize if appropriate.'
+    });
+  }
+
+  // Urinary symptoms
+  if (symptoms.includes('urine') || symptoms.includes('burning') || symptoms.includes('uti') || symptoms.includes('bladder')) {
+    matches.push({
+      name: 'Urinary tract symptoms',
+      likelihood: 84,
+      recommendation: 'Urinary symptoms may indicate infection. See healthcare provider for testing.',
+      naturalRemedies: 'Drink plenty of water, cranberry juice, avoid bladder irritants.'
+    });
+  }
+
+  // Headache
+  if (symptoms.includes('headache') || symptoms.includes('head') && symptoms.includes('pain')) {
+    matches.push({
+      name: 'Headache',
+      likelihood: 73,
+      recommendation: 'Rest in quiet, dark room. See provider for severe, frequent, or unusual headaches.',
+      naturalRemedies: 'Cold compress, rest, hydration, over-the-counter pain relief.'
+    });
+  }
+
+  // Emergency symptoms
+  if (symptoms.includes('chest pain') || symptoms.includes('heart') || symptoms.includes('chest pressure')) {
+    matches.push({
+      name: 'Chest pain - Emergency',
+      likelihood: 95,
+      recommendation: 'Seek emergency medical attention immediately for any chest pain.',
+      naturalRemedies: 'Call emergency services immediately - do not delay care.'
+    });
+  }
+
+  console.log(`Matched ${matches.length} conditions:`, matches.map(m => m.name));
+  return matches;
 }
 
-// Comprehensive symptom database - rebuilt from scratch
-const SYMPTOM_DATABASE: SymptomPattern[] = [
-  // Gynecological symptoms
-  {
-    keywords: ['vagina', 'vaginal', 'discharge', 'yeast infection', 'itch', 'burning', 'smell', 'odor'],
-    conditions: ['Vaginal infection or inflammation'],
-    triageLevel: 'medium',
-    likelihood: 80,
-    recommendation: 'See healthcare provider for proper diagnosis and treatment of vaginal symptoms.',
-    naturalRemedies: 'Wear cotton underwear, avoid douching, maintain good hygiene.'
-  },
+function createGenericResult(symptoms: string, responses: Record<string, any>): TriageResult {
+  const painLevel = responses.pain_level || 0;
   
-  // Urinary symptoms  
-  {
-    keywords: ['urine', 'burning', 'painful urination', 'uti', 'bladder'],
-    conditions: ['Urinary tract infection'],
-    triageLevel: 'medium',
-    likelihood: 85,
-    recommendation: 'See healthcare provider for urine testing and antibiotic treatment if needed.',
-    naturalRemedies: 'Drink plenty of water, cranberry juice, avoid irritants.'
-  },
+  let triageLevel: 'low' | 'medium' | 'high' = 'medium';
+  if (painLevel >= 8) triageLevel = 'high';
+  else if (painLevel <= 3) triageLevel = 'low';
+
+  return {
+    triageLevel,
+    conditions: [{
+      name: 'Symptoms requiring medical evaluation',
+      likelihood: 60,
+      recommendation: 'Your symptoms should be evaluated by a healthcare provider for proper diagnosis and treatment.',
+      naturalRemedies: 'Rest, stay hydrated, monitor symptoms, and seek medical care for proper evaluation.'
+    }],
+    actions: getActionsForTriage(triageLevel)
+  };
+}
+
+function calculateTriageLevel(matches: Condition[], responses: Record<string, any>): 'low' | 'medium' | 'high' {
+  let triageLevel: 'low' | 'medium' | 'high' = 'low';
   
-  // Respiratory symptoms
-  {
-    keywords: ['cough', 'shortness of breath', 'difficulty breathing', 'wheeze'],
-    conditions: ['Respiratory condition'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'Monitor breathing. Seek immediate care if severe difficulty breathing.',
-    naturalRemedies: 'Rest, humidifier, warm liquids, avoid smoke.'
-  },
-  
-  // Pain symptoms
-  {
-    keywords: ['pain', 'ache', 'hurt', 'sore', 'sharp pain', 'dull pain'],
-    conditions: ['Pain requiring evaluation'],
-    triageLevel: 'medium',
-    likelihood: 70,
-    recommendation: 'Evaluate pain level and location. Seek care for severe or persistent pain.',
-    naturalRemedies: 'Rest, ice or heat therapy, over-the-counter pain relief as appropriate.'
-  },
-  
-  // Digestive symptoms
-  {
-    keywords: ['nausea', 'vomit', 'stomach', 'belly', 'diarrhea', 'constipation'],
-    conditions: ['Digestive issue'],
-    triageLevel: 'low',
-    likelihood: 75,
-    recommendation: 'Stay hydrated. See provider if symptoms persist or worsen.',
-    naturalRemedies: 'BRAT diet, clear fluids, rest, probiotics.'
-  },
-  
-  // Fever and infection
-  {
-    keywords: ['fever', 'temperature', 'chills', 'infection', 'sick'],
-    conditions: ['Infection or illness'],
-    triageLevel: 'medium',
-    likelihood: 80,
-    recommendation: 'Monitor temperature. See provider for high fever or if symptoms worsen.',
-    naturalRemedies: 'Rest, fluids, fever reducers as directed by provider.'
-  },
-  
-  // Headache
-  {
-    keywords: ['headache', 'head pain', 'migraine'],
-    conditions: ['Headache'],
-    triageLevel: 'low',
-    likelihood: 70,
-    recommendation: 'Rest in quiet, dark room. See provider for severe or frequent headaches.',
-    naturalRemedies: 'Cold compress, rest, hydration, over-the-counter pain relief.'
-  },
-  
-  // Skin issues
-  {
-    keywords: ['rash', 'skin', 'red', 'swelling', 'bump'],
-    conditions: ['Skin condition'],
-    triageLevel: 'low',
-    likelihood: 65,
-    recommendation: 'Keep area clean and dry. See provider if spreading or infected.',
-    naturalRemedies: 'Gentle cleansing, avoid irritants, moisturize if appropriate.'
-  },
-  
-  // Chest symptoms
-  {
-    keywords: ['chest pain', 'heart', 'chest pressure'],
-    conditions: ['Chest pain requiring immediate evaluation'],
-    triageLevel: 'high',
-    likelihood: 90,
-    recommendation: 'Seek emergency care immediately for any chest pain.',
-    naturalRemedies: 'Call emergency services - do not delay care for chest pain.'
-  },
-  
-  // Mental health
-  {
-    keywords: ['anxiety', 'depression', 'panic', 'stress', 'worried'],
-    conditions: ['Mental health concern'],
-    triageLevel: 'medium',
-    likelihood: 75,
-    recommendation: 'Consider speaking with a mental health professional or primary care provider.',
-    naturalRemedies: 'Deep breathing, exercise, adequate sleep, support from friends/family.'
+  // Check for emergency conditions
+  if (matches.some(m => m.name.includes('Emergency') || m.name.includes('Chest pain'))) {
+    return 'high';
   }
-];
+  
+  // Check for high-priority conditions
+  if (matches.some(m => m.name.includes('Testicular') || m.name.includes('Breast lump'))) {
+    triageLevel = 'high';
+  }
+  
+  // Check pain level
+  const painLevel = responses.pain_level || 0;
+  if (painLevel >= 8) {
+    triageLevel = 'high';
+  } else if (painLevel >= 6) {
+    triageLevel = triageLevel === 'low' ? 'medium' : triageLevel;
+  }
+  
+  // Check fever
+  if (responses.fever && triageLevel === 'low') {
+    triageLevel = 'medium';
+  }
+  
+  // Default to medium for most conditions
+  if (matches.length > 0 && triageLevel === 'low') {
+    triageLevel = 'medium';
+  }
+  
+  return triageLevel;
+}
+
+function getActionsForTriage(level: 'low' | 'medium' | 'high'): string {
+  switch (level) {
+    case 'high':
+      return 'Seek emergency medical attention immediately. Do not delay care for potentially serious symptoms.';
+    case 'medium':
+      return 'Schedule an appointment with your healthcare provider within 24-48 hours. Monitor symptoms closely.';
+    case 'low':
+      return 'Practice self-care and monitor symptoms. Contact healthcare provider if symptoms worsen or persist.';
+  }
+}
