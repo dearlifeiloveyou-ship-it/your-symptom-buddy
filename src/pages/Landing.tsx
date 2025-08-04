@@ -25,6 +25,9 @@ export default function Landing() {
             <Link to="/symptom-library" className="text-muted-foreground hover:text-foreground transition-colors">
               Symptom Library
             </Link>
+            <Link to="/premium" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+              Premium AI Coaches
+            </Link>
             <Link to="/trust" className="text-muted-foreground hover:text-foreground transition-colors">
               Trust & Security
             </Link>

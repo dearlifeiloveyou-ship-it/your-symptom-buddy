@@ -15,6 +15,7 @@ import Interview from "./pages/Interview";
 import Results from "./pages/Results";
 import Dashboard from "./pages/Dashboard";
 import TrackSymptoms from "./pages/TrackSymptoms";
+import PremiumFeatures from "./pages/PremiumFeatures";
 import Disclaimer from "./pages/Disclaimer";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/results" element={<Results />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/track-symptoms" element={<TrackSymptoms />} />
+            <Route path="/premium" element={<PremiumFeatures />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

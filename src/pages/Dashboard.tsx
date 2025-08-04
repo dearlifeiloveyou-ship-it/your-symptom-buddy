@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Calendar, TrendingUp, User, Clock, AlertTriangle, BarChart3, Activity } from 'lucide-react';
+import { Plus, Calendar, TrendingUp, User, Clock, AlertTriangle, BarChart3, Activity, Brain } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays, parseISO } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -196,7 +196,7 @@ const Dashboard = () => {
 
             <TabsContent value="overview" className="space-y-6">
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/profile-selection')}>
                   <CardContent className="p-6 text-center space-y-4">
                     <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
@@ -217,6 +217,18 @@ const Dashboard = () => {
                     <div>
                       <h3 className="font-semibold text-lg">Track Symptoms</h3>
                       <p className="text-sm text-muted-foreground">Log daily symptoms and factors</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow border-2 border-primary/20" onClick={() => navigate('/premium')}>
+                  <CardContent className="p-6 text-center space-y-4">
+                    <div className="p-3 rounded-full bg-blue-100 w-fit mx-auto">
+                      <Brain className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">AI Coaches</h3>
+                      <p className="text-sm text-muted-foreground">Health & Mental Health AI Support</p>
                     </div>
                   </CardContent>
                 </Card>
