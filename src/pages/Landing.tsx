@@ -81,12 +81,12 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">MedSter 🎮</h1>
+          <h1 className="text-2xl font-bold text-primary">MDSDR 🎮</h1>
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About MedSter
+              About MDSDR
             </Link>
             <Link to="/symptom-library" className="text-muted-foreground hover:text-foreground transition-colors">
               Symptom Library
@@ -125,7 +125,7 @@ export default function Landing() {
             Health Should Be Fun! 🎉
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            Welcome to MedSter (pronounced "med-ster") - where we believe health should be engaging, not overwhelming. 
+            Welcome to MDSDR (pronounced "med-ster") - where we believe health should be engaging, not overwhelming. 
             Founded in 2024 by a passionate group of healthcare professionals, we're determined to improve people's health through fun, gamified experiences that make wellness exciting!
           </p>
           <div className="space-x-4">
@@ -160,7 +160,7 @@ export default function Landing() {
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold text-center mb-12">
-            Why Choose MedSter? 🌟
+            Why Choose MDSDR? 🌟
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -277,7 +277,7 @@ export default function Landing() {
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-muted-foreground">
           <p className="mb-4">
-            © 2024 MedSter.com - Making health fun, one level at a time! 🎮
+            © 2024 MDSDR.com - Making health fun, one level at a time! 🎮
           </p>
           <div className="space-x-4">
             <Link to="/about" className="hover:text-foreground transition-colors">

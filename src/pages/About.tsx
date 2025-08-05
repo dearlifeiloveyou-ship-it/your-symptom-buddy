@@ -12,7 +12,7 @@ export default function About() {
           <Button variant="ghost" asChild>
             <Link to="/">← Back to Home</Link>
           </Button>
-          <h1 className="text-2xl font-bold text-primary">About MedSter 🎮</h1>
+          <h1 className="text-2xl font-bold text-primary">About MDSDR 🎮</h1>
           <div className="space-x-4">
             <Button asChild>
               <Link to="/profile-selection">Start Assessment</Link>
@@ -28,7 +28,7 @@ export default function About() {
             Where Healthcare Meets Fun! 🎉
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            At MedSter, we believe health should be engaging, not scary. Founded in 2024 by a passionate group of healthcare professionals, 
+            At MDSDR (pronounced "med-ster"), we believe health should be engaging, not scary. Founded in 2024 by a passionate group of healthcare professionals, 
             we're revolutionizing wellness by making it fun, gamified, and accessible to everyone. Because taking care of yourself should feel like leveling up!
           </p>
         </div>
