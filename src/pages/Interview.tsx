@@ -91,9 +91,17 @@ const Interview = () => {
     setIsLoading(true);
     try {
       const assessmentData = secureStorage.get('currentAssessment');
-      if (!assessmentData) {
-        throw new Error('Assessment data not found');
+      if (!assessmentData || !assessmentData.symptoms) {
+        toast.error('Assessment data not found. Please start over.');
+        navigate('/profile-selection');
+        return;
       }
+      
+      console.log('Starting analysis with data:', {
+        symptoms: assessmentData.symptoms,
+        responses: Object.keys(responses).length,
+        profileType: assessmentData.profileData?.profileType
+      });
       
       // Sanitize all response data
       const sanitizedResponses = Object.fromEntries(
@@ -112,7 +120,31 @@ const Interview = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('Analysis response:', { data, error });
+
+      if (error) {
+        console.error('Analysis error details:', error);
+        if (error.message?.includes('Monthly assessment limit')) {
+          toast.error('Monthly assessment limit reached. Please upgrade to continue.');
+          navigate('/premium');
+          return;
+        } else if (error.message?.includes('rate limit')) {
+          toast.error('Too many requests. Please wait a moment and try again.');
+          return;
+        } else if (error.message?.includes('Invalid content')) {
+          toast.error('Please check your symptom description for invalid content.');
+          navigate('/symptom-input');
+          return;
+        }
+        throw error;
+      }
+
+      // Validate response structure
+      if (!data || typeof data !== 'object') {
+        console.error('Invalid response structure:', data);
+        toast.error('Received invalid response. Please try again.');
+        return;
+      }
 
       // Update secure storage with API results
       const updatedAssessment = {
@@ -124,10 +156,20 @@ const Interview = () => {
       };
       secureStorage.set('currentAssessment', updatedAssessment);
       
+      toast.success('Analysis complete!');
       navigate('/results');
     } catch (error) {
       console.error('Analysis error:', error);
-      toast.error('There was an error analyzing your symptoms. Please try again.');
+      
+      // More specific error messages
+      if (error.message?.includes('Assessment data not found')) {
+        toast.error('Session expired. Please start a new assessment.');
+        navigate('/profile-selection');
+      } else if (error.message?.includes('fetch')) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error('There was an error analyzing your symptoms. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

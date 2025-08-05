@@ -166,11 +166,15 @@ serve(async (req) => {
       }
 
       // Check subscription and usage limits
-      const { data: subscriber } = await supabaseService
+      const { data: subscriber, error: subscriberError } = await supabaseService
         .from('subscribers')
         .select('*')
         .eq('user_id', userData.user.id)
-        .single();
+        .maybeSingle();
+
+      if (subscriberError) {
+        console.error('Error fetching subscriber data:', subscriberError);
+      }
 
       if (subscriber) {
         // Check if user has exceeded monthly limit (free tier)
@@ -222,27 +226,68 @@ serve(async (req) => {
     });
 
     // Store assessment in database only for authenticated users
+    let assessmentId = null;
     if (isAuthenticated && userData) {
-      const { error: insertError } = await supabaseService
-        .from('assessments')
-        .insert({
-          user_id: userData.user.id,
-          symptom_description: sanitizedSymptoms,
-          interview_responses: interviewResponses,
-          api_results: null, // Will be updated after analysis
-          conditions: [],
-          triage_level: 'green',
-          next_steps: 'Analyzing...'
-        });
+      try {
+        const { data: assessment, error: insertError } = await supabaseService
+          .from('assessments')
+          .insert({
+            user_id: userData.user.id,
+            symptom_description: sanitizedSymptoms,
+            interview_responses: interviewResponses,
+            api_results: null, // Will be updated after analysis
+            conditions: [],
+            triage_level: 'low',
+            next_steps: 'Analyzing...'
+          })
+          .select()
+          .single();
 
-      if (insertError) {
-        console.error('Error storing assessment:', insertError);
-        // Don't fail the request if storage fails, continue with analysis
+        if (insertError) {
+          console.error('Error storing assessment:', insertError);
+          // Don't fail the request if storage fails, continue with analysis
+        } else {
+          assessmentId = assessment?.id;
+          console.log('Assessment stored with ID:', assessmentId);
+        }
+      } catch (error) {
+        console.error('Unexpected error storing assessment:', error);
       }
     }
 
     // Perform rule-based medical analysis
+    console.log('Starting medical analysis with data:', {
+      symptomsLength: sanitizedSymptoms.length,
+      responsesCount: Object.keys(interviewResponses).length,
+      profileType: profileData?.profileType,
+      isAuthenticated
+    });
+
     const analysisResult = await performMedicalAnalysis(sanitizedSymptoms, interviewResponses, profileData);
+
+    console.log('Analysis completed successfully:', {
+      triageLevel: analysisResult.triageLevel,
+      conditionsCount: analysisResult.conditions?.length || 0,
+      analysisMethod: analysisResult.analysisMethod
+    });
+
+    // Update assessment with results if we have an assessment ID
+    if (assessmentId && isAuthenticated) {
+      try {
+        await supabaseService
+          .from('assessments')
+          .update({
+            api_results: analysisResult,
+            conditions: analysisResult.conditions || [],
+            triage_level: analysisResult.triageLevel || 'low',
+            next_steps: analysisResult.actions || 'No specific actions recommended'
+          })
+          .eq('id', assessmentId);
+        console.log('Assessment updated successfully');
+      } catch (updateError) {
+        console.error('Error updating assessment:', updateError);
+      }
+    }
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
