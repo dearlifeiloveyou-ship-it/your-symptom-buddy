@@ -255,12 +255,12 @@ export default function VoiceChat({
         )}
 
         {/* Voice Controls */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
           <Button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={isProcessing || isPlaying}
             size="lg"
-            className={`relative ${
+            className={`relative min-h-[48px] w-full sm:w-auto ${
               isRecording 
                 ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
                 : 'bg-primary hover:bg-primary/90'
@@ -280,18 +280,20 @@ export default function VoiceChat({
             </span>
           </Button>
 
-          {isPlaying && (
-            <Button onClick={stopAudio} variant="outline">
-              <VolumeX className="w-4 h-4 mr-2" />
-              Stop Audio
-            </Button>
-          )}
+          <div className="flex gap-2 w-full sm:w-auto">
+            {isPlaying && (
+              <Button onClick={stopAudio} variant="outline" className="min-h-[48px] flex-1 sm:flex-none">
+                <VolumeX className="w-4 h-4 mr-2" />
+                Stop Audio
+              </Button>
+            )}
 
-          {conversation.length > 0 && (
-            <Button onClick={clearConversation} variant="outline" size="sm">
-              Clear Chat
-            </Button>
-          )}
+            {conversation.length > 0 && (
+              <Button onClick={clearConversation} variant="outline" size="sm" className="min-h-[48px] flex-1 sm:flex-none">
+                Clear Chat
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Status */}

@@ -393,15 +393,15 @@ const Dashboard = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-8">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="assessments">Assessments</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="insights">AI Insights</TabsTrigger>
-              <TabsTrigger value="gamification">🎮 Achievements</TabsTrigger>
-              <TabsTrigger value="notifications">🔔 Notifications</TabsTrigger>
-              <TabsTrigger value="photo">📸 Photo Assessment</TabsTrigger>
-              <TabsTrigger value="voice">🎤 Voice Coach</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1">
+              <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="assessments" className="text-xs sm:text-sm">Assessments</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
+              <TabsTrigger value="insights" className="text-xs sm:text-sm">AI Insights</TabsTrigger>
+              <TabsTrigger value="gamification" className="text-xs sm:text-sm">🎮</TabsTrigger>
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm">🔔</TabsTrigger>
+              <TabsTrigger value="photo" className="text-xs sm:text-sm">📸</TabsTrigger>
+              <TabsTrigger value="voice" className="text-xs sm:text-sm">🎤</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">

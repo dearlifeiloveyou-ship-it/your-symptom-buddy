@@ -114,5 +114,53 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    /* Mobile optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent zoom on iOS form inputs */
+    -webkit-text-size-adjust: 100%;
+    /* Better touch interactions */
+    touch-action: manipulation;
+  }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    /* Prevent horizontal scroll */
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+    }
+    
+    /* Better touch targets */
+    button, a, input, textarea, select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Improved readability on mobile */
+    p, span, div {
+      line-height: 1.6;
+    }
+  }
+
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    /* Fix viewport height issues */
+    .min-h-screen {
+      min-height: -webkit-fill-available;
+    }
+    
+    /* Fix input zoom on iOS */
+    input, textarea, select {
+      font-size: 16px;
+    }
+  }
+
+  /* Android Chrome specific fixes */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    /* Smooth scrolling */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
   }
 }

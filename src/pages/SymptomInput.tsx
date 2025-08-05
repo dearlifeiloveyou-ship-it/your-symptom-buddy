@@ -84,8 +84,9 @@ const SymptomInput = () => {
                     placeholder="Example: I've had a headache for 3 days that gets worse in bright light. I also feel nauseous and have trouble sleeping... (or click the mic to speak)"
                     value={symptoms}
                     onChange={(e) => handleInputChange(e.target.value)}
-                    className="min-h-[150px] text-base"
+                    className="min-h-[150px] text-base resize-none" // Prevent zoom on iOS
                     maxLength={2000}
+                    style={{ fontSize: '16px' }} // Explicit font size for iOS
                   />
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
@@ -119,7 +120,8 @@ const SymptomInput = () => {
                 <Button 
                   onClick={handleContinue}
                   disabled={!isValid}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 min-h-[48px] w-full sm:w-auto"
+                  size="lg"
                 >
                   Continue
                   <ArrowRight className="w-4 h-4" />

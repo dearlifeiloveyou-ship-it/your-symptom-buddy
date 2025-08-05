@@ -202,17 +202,18 @@ const Interview = () => {
       case 'scale':
         return (
           <div className="space-y-4">
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="flex justify-between text-sm text-muted-foreground mb-2">
               <span>1 (Mild)</span>
               <span>10 (Severe)</span>
             </div>
-            <div className="flex gap-2 justify-center flex-wrap">
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
               {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                 <Button
                   key={num}
                   variant={currentResponse === num ? 'default' : 'outline'}
                   onClick={() => handleResponse(num)}
-                  className="w-12 h-12"
+                  className="h-10 w-full min-h-[44px] text-sm"
+                  size="sm"
                 >
                   {num}
                 </Button>
@@ -279,12 +280,13 @@ const Interview = () => {
             <CardContent className="space-y-8">
               {renderQuestionInput()}
 
-              <div className="flex justify-between pt-4">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
                 <Button 
                   variant="outline" 
                   onClick={handlePrevious}
                   disabled={currentQuestionIndex === 0}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 min-h-[48px] order-2 sm:order-1"
+                  size="lg"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Previous
@@ -292,7 +294,8 @@ const Interview = () => {
                 <Button 
                   onClick={handleNext}
                   disabled={responses[currentQuestion.id] === undefined}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 min-h-[48px] order-1 sm:order-2"
+                  size="lg"
                 >
                   {currentQuestionIndex === mockQuestions.length - 1 ? 'Complete' : 'Next'}
                   <ArrowRight className="w-4 h-4" />

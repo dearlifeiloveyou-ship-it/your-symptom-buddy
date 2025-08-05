@@ -154,29 +154,29 @@ export default function PhotoAssessment({ onAnalysisComplete, className = "" }: 
           Upload a photo of a health concern for AI-powered analysis
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         {/* Image Upload Section */}
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 sm:p-6 text-center">
             {selectedImage ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <img 
                   src={selectedImage} 
                   alt="Selected for analysis" 
-                  className="max-w-full max-h-64 mx-auto rounded-lg object-contain"
+                  className="max-w-full max-h-48 sm:max-h-64 mx-auto rounded-lg object-contain"
                 />
                 <Button 
                   variant="outline" 
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto"
                 >
                   <Upload className="w-4 h-4" />
                   Choose Different Image
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <Camera className="w-12 h-12 mx-auto text-muted-foreground" />
+              <div className="space-y-3 sm:space-y-4">
+                <Camera className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Upload a health-related photo</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -186,7 +186,7 @@ export default function PhotoAssessment({ onAnalysisComplete, className = "" }: 
                 <Button 
                   variant="outline" 
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto"
                 >
                   <Upload className="w-4 h-4" />
                   Select Image
@@ -213,7 +213,7 @@ export default function PhotoAssessment({ onAnalysisComplete, className = "" }: 
             placeholder="Describe any symptoms, concerns, or context about the photo..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[80px]"
+            className="min-h-[80px] text-base" // Prevent zoom on iOS
             maxLength={500}
           />
           <div className="text-right text-xs text-muted-foreground">
@@ -225,7 +225,8 @@ export default function PhotoAssessment({ onAnalysisComplete, className = "" }: 
         <Button 
           onClick={handleAnalyze}
           disabled={!selectedImage || isAnalyzing}
-          className="w-full"
+          className="w-full min-h-[48px]" // Better touch target
+          size="lg"
         >
           {isAnalyzing ? (
             <>
