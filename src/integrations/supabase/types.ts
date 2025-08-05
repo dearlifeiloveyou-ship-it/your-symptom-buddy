@@ -542,6 +542,48 @@ export type Database = {
           },
         ]
       }
+      user_stats: {
+        Row: {
+          assessments_completed: number
+          badges_earned: string[]
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assessments_completed?: number
+          badges_earned?: string[]
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assessments_completed?: number
+          badges_earned?: string[]
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       voice_interactions: {
         Row: {
           audio_duration: number | null
@@ -589,6 +631,10 @@ export type Database = {
       }
       reset_monthly_assessments: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_user_streak: {
+        Args: { user_id_param: string }
         Returns: undefined
       }
     }

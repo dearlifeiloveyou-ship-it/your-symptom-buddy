@@ -339,12 +339,13 @@ const Dashboard = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+              <TabsTrigger value="assessments">My Assessments</TabsTrigger>
+              <TabsTrigger value="tracking">Symptom Tracking</TabsTrigger>
+              <TabsTrigger value="analytics">Health Analytics</TabsTrigger>
+              <TabsTrigger value="insights">AI Insights</TabsTrigger>
+              <TabsTrigger value="gamification">🎮 Achievements</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -750,6 +751,10 @@ const Dashboard = () => {
                   <PricingSection />
                 </CardContent>
               </Card>
+            </TabsContent>
+            
+            <TabsContent value="gamification" className="space-y-6">
+              <Gamification />
             </TabsContent>
           </Tabs>
         </div>
