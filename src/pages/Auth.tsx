@@ -15,7 +15,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { signIn, signUp } = useAuth();
+  const [showResetForm, setShowResetForm] = useState(false);
+  const { signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   const validateInput = (name: string, value: string, isSignUp: boolean = false) => {
@@ -149,6 +150,41 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setError("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await resetPassword(email);
+    
+    if (error) {
+      setError(error.message);
+      toast({
+        title: "Reset failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Password reset sent",
+        description: "Check your email for password reset instructions."
+      });
+      setShowResetForm(false);
+    }
+    
+    setIsLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
@@ -166,45 +202,89 @@ export default function Auth() {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                    onChange={(e) => validateInput('email', e.target.value)}
-                  />
-                  {validationErrors.email && (
-                    <p className="text-sm text-destructive">{validationErrors.email}</p>
+              {!showResetForm ? (
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      required
+                      onChange={(e) => validateInput('email', e.target.value)}
+                    />
+                    {validationErrors.email && (
+                      <p className="text-sm text-destructive">{validationErrors.email}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      required
+                      onChange={(e) => validateInput('password', e.target.value)}
+                    />
+                    {validationErrors.password && (
+                      <p className="text-sm text-destructive">{validationErrors.password}</p>
+                    )}
+                  </div>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                   )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    required
-                    onChange={(e) => validateInput('password', e.target.value)}
-                  />
-                  {validationErrors.password && (
-                    <p className="text-sm text-destructive">{validationErrors.password}</p>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Sign In
+                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      type="button"
+                      variant="link" 
+                      onClick={() => setShowResetForm(true)}
+                      className="text-sm text-muted-foreground"
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </div>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                   )}
-                </div>
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send Reset Link
+                  </Button>
+                  <div className="text-center">
+                    <Button 
+                      type="button"
+                      variant="link" 
+                      onClick={() => setShowResetForm(false)}
+                      className="text-sm text-muted-foreground"
+                    >
+                      ← Back to Sign In
+                    </Button>
+                  </div>
+                </form>
+              )}
             </TabsContent>
             
             <TabsContent value="signup">
