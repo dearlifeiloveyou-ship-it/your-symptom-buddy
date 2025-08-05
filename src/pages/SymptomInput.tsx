@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, ArrowLeft, Mic } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowRight, ArrowLeft, Mic, Send } from 'lucide-react';
 import { symptomSchema, secureStorage, sanitizeText } from '@/lib/security';
 import VoiceInput from '@/components/VoiceInput';
 
