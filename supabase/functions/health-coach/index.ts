@@ -42,16 +42,20 @@ serve(async (req) => {
       });
     }
 
-    // Check premium subscription
+    // Check premium subscription or trial
     const { data: subscriber } = await supabaseService
       .from('subscribers')
-      .select('subscribed, subscription_tier')
+      .select('subscribed, subscription_tier, is_in_trial, trial_ends_at')
       .eq('user_id', userData.user.id)
       .single();
 
-    if (!subscriber?.subscribed) {
+    // Check if user has access (subscribed or in valid trial)
+    const hasAccess = subscriber?.subscribed || 
+      (subscriber?.is_in_trial && subscriber?.trial_ends_at && new Date(subscriber.trial_ends_at) > new Date());
+
+    if (!hasAccess) {
       return new Response(JSON.stringify({ 
-        error: 'Premium subscription required for AI Health Coach',
+        error: 'Premium subscription or trial required for AI Health Coach',
         requiresUpgrade: true 
       }), {
         status: 403,

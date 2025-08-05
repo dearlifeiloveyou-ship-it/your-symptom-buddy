@@ -157,7 +157,13 @@ const Results = () => {
           }
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      // Update user stats
+      await supabase.rpc('update_user_streak', { user_id_param: user.id });
 
       toast.success('Assessment saved successfully!');
       secureStorage.remove('currentAssessment');

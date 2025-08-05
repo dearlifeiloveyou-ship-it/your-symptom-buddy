@@ -151,30 +151,47 @@ export default function VoiceChat({
         }
       });
 
-      if (speechError) throw speechError;
-
-      // Play AI response
-      const audioData = atob(speechData.audioContent);
-      const audioArray = new Uint8Array(audioData.length);
-      for (let i = 0; i < audioData.length; i++) {
-        audioArray[i] = audioData.charCodeAt(i);
-      }
-      
-      const audioBlob2 = new Blob([audioArray], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob2);
-      
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.onended = () => {
-          setIsPlaying(false);
-          URL.revokeObjectURL(audioUrl);
-        };
-        setIsPlaying(true);
-        await audioRef.current.play();
+      if (speechError) {
+        console.error('Text-to-speech error:', speechError);
+        // Continue without audio if speech fails
+        toast({
+          title: "Audio Error",
+          description: "Voice response failed, but text is available",
+          variant: "destructive"
+        });
+      } else {
+        try {
+          // Play AI response
+          const audioData = atob(speechData.audioContent);
+          const audioArray = new Uint8Array(audioData.length);
+          for (let i = 0; i < audioData.length; i++) {
+            audioArray[i] = audioData.charCodeAt(i);
+          }
+          
+          const audioBlob2 = new Blob([audioArray], { type: 'audio/mpeg' });
+          const audioUrl = URL.createObjectURL(audioBlob2);
+          
+          if (audioRef.current) {
+            audioRef.current.src = audioUrl;
+            audioRef.current.onended = () => {
+              setIsPlaying(false);
+              URL.revokeObjectURL(audioUrl);
+            };
+            setIsPlaying(true);
+            await audioRef.current.play();
+          }
+        } catch (audioError) {
+          console.error('Audio playback error:', audioError);
+          toast({
+            title: "Audio Playback Error",
+            description: "Failed to play voice response",
+            variant: "destructive"
+          });
+        }
       }
 
       if (onResponse) {
-        onResponse(aiResponse, audioUrl);
+        onResponse(aiResponse);
       }
 
       toast({

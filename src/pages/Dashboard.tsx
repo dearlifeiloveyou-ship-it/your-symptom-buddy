@@ -16,6 +16,8 @@ import PricingSection from '@/components/PricingSection';
 import AdvancedAnalytics from '@/components/AdvancedAnalytics';
 import Gamification from '@/components/Gamification';
 import NotificationManager from '@/components/NotificationManager';
+import PhotoAssessment from '@/components/PhotoAssessment';
+import VoiceChat from '@/components/VoiceChat';
 
 interface Assessment {
   id: string;
@@ -49,6 +51,19 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('30'); // days
   const [selectedSymptom, setSelectedSymptom] = useState<string>('all');
   const [healthInsights, setHealthInsights] = useState<any>(null);
+  const [showTrialModal, setShowTrialModal] = useState(false);
+
+  interface SubscriptionData {
+    subscribed: boolean;
+    subscription_tier: string | null;
+    subscription_end: string | null;
+    is_in_trial?: boolean;
+    trial_started_at?: string | null;
+    trial_ends_at?: string | null;
+  }
+  
+  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -59,7 +74,8 @@ const Dashboard = () => {
     Promise.all([
       fetchAssessments(),
       fetchSymptoms(),
-      fetchFactors()
+      fetchFactors(),
+      checkSubscriptionStatus()
     ]);
   }, [user, navigate]);
 
@@ -112,6 +128,43 @@ const Dashboard = () => {
       console.error('Error fetching factors:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkSubscriptionStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) throw error;
+      
+      setSubscriptionData(data);
+      
+      // Check if user qualifies for trial
+      if (!data.subscribed && !data.is_in_trial && !data.trial_started_at) {
+        setShowTrialModal(true);
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    } finally {
+      setIsLoadingSubscription(false);
+    }
+  };
+
+  const startTrial = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase.rpc('start_trial', { user_id_param: user.id });
+      if (error) throw error;
+      
+      toast.success('Trial started! You now have 7 days of free premium access');
+      
+      setShowTrialModal(false);
+      checkSubscriptionStatus();
+    } catch (error) {
+      console.error('Error starting trial:', error);
+      toast.error('Failed to start trial. Please try again.');
     }
   };
 
@@ -340,13 +393,15 @@ const Dashboard = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="assessments">Assessments</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="insights">AI Insights</TabsTrigger>
               <TabsTrigger value="gamification">🎮 Achievements</TabsTrigger>
               <TabsTrigger value="notifications">🔔 Notifications</TabsTrigger>
+              <TabsTrigger value="photo">📸 Photo Assessment</TabsTrigger>
+              <TabsTrigger value="voice">🎤 Voice Coach</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -761,9 +816,61 @@ const Dashboard = () => {
             <TabsContent value="notifications" className="space-y-6">
               <NotificationManager />
             </TabsContent>
+
+            <TabsContent value="photo" className="space-y-6">
+              <PhotoAssessment />
+            </TabsContent>
+
+            <TabsContent value="voice" className="space-y-6">
+              <VoiceChat 
+                systemPrompt="You are a compassionate AI health coach. Provide supportive guidance about health concerns, wellness tips, and encourage users to seek professional medical care when appropriate."
+                voice="alloy"
+              />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      {/* Trial Modal */}
+      {showTrialModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full">
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl text-primary">🎉 Start Your Free Trial!</CardTitle>
+              <CardDescription>
+                Get 7 days of unlimited premium features
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">Premium features include:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Unlimited health assessments</li>
+                  <li>• AI-powered photo analysis</li>
+                  <li>• Voice chat with health coach</li>
+                  <li>• Advanced health insights</li>
+                  <li>• Priority support</li>
+                </ul>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={startTrial} className="flex-1">
+                  Start Free Trial
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowTrialModal(false)}
+                  className="flex-1"
+                >
+                  Maybe Later
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                No credit card required. Cancel anytime.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
