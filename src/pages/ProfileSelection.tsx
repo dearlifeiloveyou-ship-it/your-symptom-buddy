@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { User, Baby, UserPlus, ArrowRight } from 'lucide-react';
+import { User, Baby, UserPlus, ArrowRight, Heart, Calculator } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { secureStorage } from '@/lib/security';
+import { supabase } from '@/integrations/supabase/client';
 import SEO from '@/components/SEO';
 
 const ProfileSelection = () => {
@@ -19,35 +21,84 @@ const ProfileSelection = () => {
     age: '',
     sex: ''
   });
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  // Fetch user profile data when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const getBmiCategory = (bmi: number) => {
+    if (bmi < 18.5) return { category: 'Underweight', color: 'text-blue-600' };
+    if (bmi < 25) return { category: 'Normal', color: 'text-green-600' };
+    if (bmi < 30) return { category: 'Overweight', color: 'text-orange-600' };
+    return { category: 'Obese', color: 'text-red-600' };
+  };
 
   const profileOptions = [
     {
       id: 'myself' as const,
       title: 'For myself',
-      description: 'Get health guidance for your own symptoms',
+      description: userProfile ? 
+        `Get personalized health guidance based on your profile` : 
+        'Get health guidance for your own symptoms',
       icon: User,
-      available: !!user
+      available: !!user,
+      enhanced: !!userProfile
     },
     {
       id: 'child' as const,
       title: 'For my child',
       description: 'Health guidance for your child or dependent',
       icon: Baby,
-      available: !!user
+      available: !!user,
+      enhanced: false
     },
     {
       id: 'guest' as const,
       title: 'Guest check',
       description: 'Quick symptom check without creating an account',
       icon: UserPlus,
-      available: true
+      available: true,
+      enhanced: false
     }
   ];
 
   const handleContinue = () => {
     const assessmentData = {
       profileType: selectedProfile,
-      profileData: selectedProfile === 'guest' ? guestInfo : null,
+      profileData: selectedProfile === 'guest' ? guestInfo : 
+                   selectedProfile === 'myself' ? userProfile : null,
       step: 'symptoms',
       timestamp: Date.now()
     };
@@ -106,10 +157,39 @@ const ProfileSelection = () => {
                           <Icon className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium">{option.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{option.title}</h3>
+                            {option.enhanced && <Badge variant="secondary" className="text-xs">Personalized</Badge>}
+                          </div>
                           <p className="text-sm text-muted-foreground">{option.description}</p>
                           {!option.available && (
                             <p className="text-xs text-destructive mt-1">Please sign in to use this option</p>
+                          )}
+                          
+                          {/* Show user profile preview for "myself" option */}
+                          {option.id === 'myself' && userProfile && (
+                            <div className="mt-2 p-2 bg-secondary/30 rounded-md">
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                {userProfile.date_of_birth && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {calculateAge(userProfile.date_of_birth)} years
+                                  </div>
+                                )}
+                                {userProfile.bmi && (
+                                  <div className="flex items-center gap-1">
+                                    <Calculator className="w-3 h-3" />
+                                    BMI: {userProfile.bmi}
+                                  </div>
+                                )}
+                                {userProfile.medical_conditions && userProfile.medical_conditions.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <Heart className="w-3 h-3" />
+                                    {userProfile.medical_conditions.length} condition(s)
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
                       </CardContent>

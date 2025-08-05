@@ -21,6 +21,7 @@ import Disclaimer from "./pages/Disclaimer";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
+import HealthProfile from "./pages/HealthProfile";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,7 @@ const App = () => (
               <Route path="/interview" element={<Interview />} />
               <Route path="/results" element={<Results />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/track-symptoms" element={<TrackSymptoms />} />
+              <Route path="/health-profile" element={<HealthProfile />} />
               <Route path="/premium" element={<PremiumFeatures />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/privacy" element={<Privacy />} />
