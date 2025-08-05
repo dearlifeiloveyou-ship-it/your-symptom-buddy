@@ -91,12 +91,19 @@ interface Condition {
   likelihood: number;
   recommendation: string;
   naturalRemedies: string;
+  reasoning?: string;
+  confidenceLevel?: 'high' | 'medium' | 'low';
+  sources?: string[];
 }
 
 interface TriageResult {
   triageLevel: 'low' | 'medium' | 'high';
   conditions: Condition[];
   actions: string;
+  reasoning?: string;
+  confidenceScore?: number;
+  analysisMethod?: 'ai' | 'rule-based';
+  limitationsNote?: string;
 }
 
 interface SymptomPattern {
@@ -317,11 +324,18 @@ For each analysis, provide:
 RESPONSE FORMAT: You must respond in valid JSON format with this exact structure:
 {
   "triageLevel": "low|medium|high",
+  "reasoning": "Detailed explanation of how you arrived at this triage level",
+  "confidenceScore": 0.85,
+  "analysisMethod": "ai",
+  "limitationsNote": "Specific limitations of this analysis",
   "conditions": [
     {
       "name": "Condition name",
       "likelihood": 75,
       "recommendation": "Specific medical recommendation",
+      "reasoning": "Why this condition was suggested based on symptoms",
+      "confidenceLevel": "high|medium|low",
+      "sources": ["Brief medical guideline reference"],
       "naturalRemedies": "Safe natural remedies if applicable"
     }
   ],
@@ -407,7 +421,11 @@ async function performRuleBasedAnalysis(symptoms: string, responses: Record<stri
   return {
     triageLevel,
     conditions: sortedMatches,
-    actions: getActionsForTriage(triageLevel)
+    actions: getActionsForTriage(triageLevel),
+    reasoning: `Rule-based analysis considered symptom severity, duration, and associated factors. Triage level determined by pain level (${responses.pain_level || 'unknown'}/10), fever presence (${responses.fever ? 'yes' : 'no'}), and symptom duration.`,
+    confidenceScore: 0.7,
+    analysisMethod: 'rule-based' as const,
+    limitationsNote: 'This rule-based analysis uses common symptom patterns and may not capture complex or rare conditions. Consider individual medical history and seek professional evaluation.'
   };
 }
 
@@ -424,6 +442,9 @@ function findSymptomMatches(symptoms: string, responses: Record<string, any>): C
         name: 'Testicular lump or mass',
         likelihood: 85,
         recommendation: 'Testicular lumps require immediate medical evaluation to rule out serious conditions including cancer. Schedule urgent appointment with healthcare provider.',
+        reasoning: 'Any palpable testicular mass requires urgent evaluation due to potential for testicular cancer, which is highly treatable when caught early.',
+        confidenceLevel: 'high' as const,
+        sources: ['American Cancer Society testicular cancer guidelines', 'Urology care guidelines'],
         naturalRemedies: 'Do not delay medical care. Avoid self-treatment for testicular lumps.'
       });
     }
@@ -559,9 +580,16 @@ function createGenericResult(symptoms: string, responses: Record<string, any>): 
       name: 'Symptoms requiring medical evaluation',
       likelihood: 60,
       recommendation: 'Your symptoms should be evaluated by a healthcare provider for proper diagnosis and treatment.',
+      reasoning: 'Symptoms did not match specific patterns in our database, indicating need for professional medical evaluation.',
+      confidenceLevel: 'low' as const,
+      sources: ['General medical evaluation guidelines'],
       naturalRemedies: 'Rest, stay hydrated, monitor symptoms, and seek medical care for proper evaluation.'
     }],
-    actions: getActionsForTriage(triageLevel)
+    actions: getActionsForTriage(triageLevel),
+    reasoning: `Generic assessment based on reported symptoms and pain level (${painLevel}/10). No specific condition patterns identified.`,
+    confidenceScore: 0.5,
+    analysisMethod: 'rule-based' as const,
+    limitationsNote: 'No specific symptom patterns identified. Professional medical evaluation recommended for accurate diagnosis.'
   };
 }
 
