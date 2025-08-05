@@ -87,15 +87,18 @@ const HealthOnboarding = ({ onComplete, onSkip }: HealthOnboardingProps) => {
     
     setIsLoading(true);
     try {
+      // Use upsert to handle both new profiles and updates
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          user_id: user.id,
           ...profile,
           onboarding_completed: true,
           health_questionnaire_completed: true,
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+        }, {
+          onConflict: 'user_id'
+        });
 
       if (error) throw error;
 

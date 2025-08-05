@@ -63,19 +63,21 @@ const HealthProfile = () => {
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       
       setProfile(data);
       
-      // Show onboarding if profile is incomplete
-      if (!data?.onboarding_completed) {
+      // Show onboarding if profile is null or incomplete
+      if (!data || !data.onboarding_completed) {
         setShowOnboarding(true);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
+      // If no profile exists, show onboarding
+      setShowOnboarding(true);
     } finally {
       setLoading(false);
     }

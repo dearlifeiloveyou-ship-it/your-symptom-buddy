@@ -13,6 +13,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { generatePDFReport } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
 import PricingSection from '@/components/PricingSection';
+import AdvancedAnalytics from '@/components/AdvancedAnalytics';
 
 interface Assessment {
   id: string;
@@ -636,96 +637,42 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            {/* New Insights Tab */}
+            {/* Advanced AI Analytics Tab */}
             <TabsContent value="insights" className="space-y-6">
-              {healthInsights && Object.keys(healthInsights.trends).length > 0 ? (
-                <>
-                  {/* Health Trends Summary */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Brain className="w-5 h-5" />
-                        AI Health Insights
-                      </CardTitle>
-                      <CardDescription>
-                        Personalized insights based on your health data trends
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {Object.entries(healthInsights.trends).map(([symptom, trend]: [string, any]) => (
-                        <div key={symptom} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{symptom}</h4>
-                            <Badge 
-                              variant={trend.direction === 'improving' ? 'default' : 
-                                     trend.direction === 'worsening' ? 'destructive' : 'secondary'}
-                            >
-                              {trend.direction}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Recent average: {trend.recentAverage}/5 severity
-                            {trend.direction === 'improving' && ' - Keep up the good work!'}
-                            {trend.direction === 'worsening' && ' - Consider tracking triggers'}
-                            {trend.direction === 'stable' && ' - Maintaining steady levels'}
-                          </p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-
-                  {/* Recommendations */}
-                  {(healthInsights.recommendations.length > 0 || healthInsights.improvements.length > 0) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {healthInsights.recommendations.length > 0 && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-orange-600">⚠️ Areas for Attention</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <ul className="space-y-2">
-                              {healthInsights.recommendations.map((rec: string, idx: number) => (
-                                <li key={idx} className="text-sm p-2 bg-orange-50 dark:bg-orange-900/20 rounded">
-                                  {rec}
-                                </li>
-                              ))}
-                            </ul>
-                          </CardContent>
-                        </Card>
-                      )}
-
-                      {healthInsights.improvements.length > 0 && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-green-600">✅ Positive Progress</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <ul className="space-y-2">
-                              {healthInsights.improvements.map((imp: string, idx: number) => (
-                                <li key={idx} className="text-sm p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                                  {imp}
-                                </li>
-                              ))}
-                            </ul>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
+              <AdvancedAnalytics />
+              
+              {/* Legacy Basic Insights - Keep as backup */}
+              {healthInsights && Object.keys(healthInsights.trends).length > 0 && (
                 <Card>
-                  <CardContent className="p-8 text-center">
-                    <div className="p-4 rounded-full bg-secondary/30 w-fit mx-auto mb-4">
-                      <Brain className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="font-medium text-lg mb-2">Not enough data for insights</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Track symptoms for at least a week to generate personalized health insights
-                    </p>
-                    <Button onClick={() => navigate('/track-symptoms')}>
-                      Start Tracking Symptoms
-                    </Button>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Basic Health Trends
+                    </CardTitle>
+                    <CardDescription>
+                      Simple pattern analysis from your tracked symptoms
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {Object.entries(healthInsights.trends).map(([symptom, trend]: [string, any]) => (
+                      <div key={symptom} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{symptom}</h4>
+                          <Badge 
+                            variant={trend.direction === 'improving' ? 'default' : 
+                                   trend.direction === 'worsening' ? 'destructive' : 'secondary'}
+                          >
+                            {trend.direction}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Recent average: {trend.recentAverage}/5 severity
+                          {trend.direction === 'improving' && ' - Keep up the good work!'}
+                          {trend.direction === 'worsening' && ' - Consider tracking triggers'}
+                          {trend.direction === 'stable' && ' - Maintaining steady levels'}
+                        </p>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               )}
