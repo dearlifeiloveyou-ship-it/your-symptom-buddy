@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { User, Baby, UserPlus, ArrowRight } from 'lucide-react';
+import { secureStorage } from '@/lib/security';
 import SEO from '@/components/SEO';
 
 const ProfileSelection = () => {
@@ -47,10 +48,11 @@ const ProfileSelection = () => {
     const assessmentData = {
       profileType: selectedProfile,
       profileData: selectedProfile === 'guest' ? guestInfo : null,
-      step: 'symptoms'
+      step: 'symptoms',
+      timestamp: Date.now()
     };
     
-    localStorage.setItem('currentAssessment', JSON.stringify(assessmentData));
+    secureStorage.set('currentAssessment', assessmentData);
     navigate('/symptom-input');
   };
 

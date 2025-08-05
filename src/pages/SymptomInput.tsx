@@ -33,8 +33,11 @@ const SymptomInput = () => {
     // Sanitize only when saving/submitting
     const sanitizedSymptoms = sanitizeText(symptoms);
     
-    // Use secure storage instead of localStorage for sensitive data
+    // Get existing assessment data and merge with new symptoms
+    const existingData = secureStorage.get('currentAssessment') || {};
+    
     secureStorage.set('currentAssessment', {
+      ...existingData,
       symptoms: sanitizedSymptoms,
       step: 'interview',
       timestamp: Date.now()
