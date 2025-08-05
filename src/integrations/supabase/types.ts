@@ -166,6 +166,42 @@ export type Database = {
         }
         Relationships: []
       }
+      health_insights: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          insight_type: string
+          is_active: boolean | null
+          priority: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          insight_type: string
+          is_active?: boolean | null
+          priority?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          insight_type?: string
+          is_active?: boolean | null
+          priority?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listing_drafts: {
         Row: {
           ai_generated_data: Json | null
@@ -240,40 +276,76 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activity_level: string | null
+          allergies: string[] | null
+          bmi: number | null
           business_name: string | null
           created_at: string
           date_of_birth: string | null
           email: string | null
+          emergency_contact: string | null
           full_name: string | null
+          health_goals: string[] | null
+          health_questionnaire_completed: boolean | null
+          height_cm: number | null
           id: string
+          medical_conditions: string[] | null
+          medications: string[] | null
+          onboarding_completed: boolean | null
+          preferred_units: string | null
           relationship: string | null
           sex: string | null
           updated_at: string
           user_id: string
+          weight_kg: number | null
         }
         Insert: {
+          activity_level?: string | null
+          allergies?: string[] | null
+          bmi?: number | null
           business_name?: string | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
+          emergency_contact?: string | null
           full_name?: string | null
+          health_goals?: string[] | null
+          health_questionnaire_completed?: boolean | null
+          height_cm?: number | null
           id?: string
+          medical_conditions?: string[] | null
+          medications?: string[] | null
+          onboarding_completed?: boolean | null
+          preferred_units?: string | null
           relationship?: string | null
           sex?: string | null
           updated_at?: string
           user_id: string
+          weight_kg?: number | null
         }
         Update: {
+          activity_level?: string | null
+          allergies?: string[] | null
+          bmi?: number | null
           business_name?: string | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
+          emergency_contact?: string | null
           full_name?: string | null
+          health_goals?: string[] | null
+          health_questionnaire_completed?: boolean | null
+          height_cm?: number | null
           id?: string
+          medical_conditions?: string[] | null
+          medications?: string[] | null
+          onboarding_completed?: boolean | null
+          preferred_units?: string | null
           relationship?: string | null
           sex?: string | null
           updated_at?: string
           user_id?: string
+          weight_kg?: number | null
         }
         Relationships: []
       }
@@ -475,6 +547,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_bmi: {
+        Args: { height_cm: number; weight_kg: number }
+        Returns: number
+      }
       reset_monthly_assessments: {
         Args: Record<PropertyKey, never>
         Returns: undefined
