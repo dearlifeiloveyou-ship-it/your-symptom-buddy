@@ -2,13 +2,13 @@ import jsPDF from 'jspdf';
 
 interface AssessmentData {
   symptoms: string;
-  interviewResponses: Record<string, any>;
+  interviewResponses?: Record<string, any>;
   profileData?: {
     age?: string;
     sex?: string;
     profileType: string;
   };
-  analysisResults: {
+  analysisResults?: {
     triageLevel: string;
     actions: string;
     conditions: Array<{
@@ -18,6 +18,20 @@ interface AssessmentData {
       naturalRemedies?: string;
     }>;
   };
+  // Enhanced data for comprehensive reports
+  factors?: Array<{
+    factor_name: string;
+    factor_value: string;
+    logged_at: string;
+  }>;
+  assessments?: Array<{
+    created_at: string;
+    triage_level: string;
+    symptom_description: string;
+  }>;
+  insights?: any;
+  timeRange?: string;
+  userEmail?: string;
 }
 
 export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: string) => {
@@ -82,10 +96,14 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
   }
 
   // Symptom Description
-  addSection('Chief Complaint / Symptoms', assessmentData.symptoms);
+  if (typeof assessmentData.symptoms === 'string') {
+    addSection('Chief Complaint / Symptoms', assessmentData.symptoms);
+  } else {
+    addSection('Tracked Symptoms Summary', `This report includes ${JSON.parse(assessmentData.symptoms).length} tracked symptom entries over ${assessmentData.timeRange || 'the selected period'}.`);
+  }
 
   // Interview Responses
-  if (Object.keys(assessmentData.interviewResponses).length > 0) {
+  if (assessmentData.interviewResponses && Object.keys(assessmentData.interviewResponses).length > 0) {
     currentY += 10;
     addText('Additional Information', 14, true);
     
@@ -103,30 +121,63 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
     });
   }
 
-  // Triage Level
-  currentY += 10;
-  addText('Assessment Results', 14, true);
-  addText(`Triage Level: ${assessmentData.analysisResults.triageLevel.toUpperCase()} PRIORITY`, 12, true);
-
-  // Possible Conditions
-  if (assessmentData.analysisResults.conditions.length > 0) {
+  // Assessment Results (if available)
+  if (assessmentData.analysisResults) {
     currentY += 10;
-    addText('Possible Conditions', 14, true);
-    
-    assessmentData.analysisResults.conditions.forEach((condition, index) => {
-      addText(`${index + 1}. ${condition.name} (${condition.likelihood}% likelihood)`, 12, true);
-      addText(`   Medical Recommendation: ${condition.recommendation}`, 11);
-      if (condition.naturalRemedies) {
-        addText(`   Natural Remedies: ${condition.naturalRemedies}`, 11);
-      }
-      currentY += 3;
-    });
+    addText('Assessment Results', 14, true);
+    addText(`Triage Level: ${assessmentData.analysisResults.triageLevel.toUpperCase()} PRIORITY`, 12, true);
+
+    // Possible Conditions
+    if (assessmentData.analysisResults.conditions.length > 0) {
+      currentY += 10;
+      addText('Possible Conditions', 14, true);
+      
+      assessmentData.analysisResults.conditions.forEach((condition, index) => {
+        addText(`${index + 1}. ${condition.name} (${condition.likelihood}% likelihood)`, 12, true);
+        addText(`   Medical Recommendation: ${condition.recommendation}`, 11);
+        if (condition.naturalRemedies) {
+          addText(`   Natural Remedies: ${condition.naturalRemedies}`, 11);
+        }
+        currentY += 3;
+      });
+    }
+
+    // Recommendations
+    currentY += 10;
+    addText('Recommended Actions', 14, true);
+    addText(assessmentData.analysisResults.actions, 12);
   }
 
-  // Recommendations
-  currentY += 10;
-  addText('Recommended Actions', 14, true);
-  addText(assessmentData.analysisResults.actions, 12);
+  // Health Insights (if available)
+  if (assessmentData.insights && Object.keys(assessmentData.insights.trends || {}).length > 0) {
+    currentY += 15;
+    addText('Health Insights & Trends', 14, true);
+    
+    Object.entries(assessmentData.insights.trends).forEach(([symptom, trend]: [string, any]) => {
+      addText(`${symptom}: ${trend.direction} (Recent avg: ${trend.recentAverage}/5)`, 12);
+    });
+
+    if (assessmentData.insights.recommendations?.length > 0) {
+      currentY += 10;
+      addText('Recommendations:', 12, true);
+      assessmentData.insights.recommendations.forEach((rec: string) => {
+        addText(`• ${rec}`, 11);
+      });
+    }
+  }
+
+  // Assessment History Summary
+  if (assessmentData.assessments && assessmentData.assessments.length > 0) {
+    currentY += 15;
+    addText('Assessment History', 14, true);
+    addText(`Total assessments: ${assessmentData.assessments.length}`, 12);
+    
+    const recentAssessments = assessmentData.assessments.slice(-3);
+    recentAssessments.forEach((assessment, index) => {
+      const date = new Date(assessment.created_at).toLocaleDateString();
+      addText(`${index + 1}. ${date} - ${assessment.triage_level} priority`, 11);
+    });
+  }
 
   // Medical Disclaimer
   currentY += 20;
