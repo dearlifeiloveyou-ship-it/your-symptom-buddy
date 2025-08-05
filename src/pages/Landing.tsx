@@ -81,12 +81,12 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">MDSDR.com</h1>
+          <h1 className="text-2xl font-bold text-primary">MedSter 🎮</h1>
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About
+              About MedSter
             </Link>
             <Link to="/symptom-library" className="text-muted-foreground hover:text-foreground transition-colors">
               Symptom Library
@@ -122,11 +122,11 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Your Partner in Health and Wellbeing
+            Health Should Be Fun! 🎉
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            We're here to support you through every health concern with empathetic, AI-powered guidance. 
-            Because your health journey deserves a companion who truly understands and cares about your wellbeing.
+            Welcome to MedSter (pronounced "med-ster") - where we believe health should be engaging, not overwhelming. 
+            Founded in 2024 by a passionate group of healthcare professionals, we're determined to improve people's health through fun, gamified experiences that make wellness exciting!
           </p>
           <div className="space-x-4">
             <Button 
@@ -160,17 +160,17 @@ export default function Landing() {
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <h3 className="text-3xl font-bold text-center mb-12">
-            Why Choose MDSDR?
+            Why Choose MedSter? 🌟
           </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardHeader>
                 <Heart className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Empathetic Care</CardTitle>
+                <CardTitle>Health Made Fun 🎮</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Your health journey shouldn't feel overwhelming. We provide clear, compassionate guidance that puts your mind at ease.
+                Earn points, unlock badges, and track streaks! We gamify your health journey to make wellness engaging and rewarding.
               </CardDescription>
               </CardContent>
             </Card>
@@ -178,11 +178,11 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Shield className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Trusted & Secure</CardTitle>
+                <CardTitle>Healthcare Professional Approved ✅</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Your trust is sacred to us. Enterprise-grade security, HIPAA compliance, and radical data privacy protect what matters most.
+                Built by healthcare professionals who understand that making health fun doesn't mean compromising on accuracy or safety.
               </CardDescription>
               </CardContent>
             </Card>
@@ -190,11 +190,11 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Clock className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>24/7 Available</CardTitle>
+                <CardTitle>Always Available 🌟</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Health concerns don't wait for office hours. We're here whenever you need guidance, day or night.
+                Your health coach never sleeps! Get instant guidance anytime with our AI-powered platform that makes help available 24/7.
               </CardDescription>
               </CardContent>
             </Card>
@@ -202,11 +202,11 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Users className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Family Focused</CardTitle>
+                <CardTitle>Family Fun Together 👨‍👩‍👧‍👦</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Because health is a family matter. Support the wellbeing of everyone you care about from one trusted platform.
+                Compete with family members, share achievements, and make wellness a fun family activity that everyone can enjoy!
               </CardDescription>
               </CardContent>
             </Card>
@@ -226,9 +226,9 @@ export default function Landing() {
                 1
               </div>
               <div>
-                <h4 className="text-xl font-semibold mb-2">Describe Your Symptoms</h4>
+                <h4 className="text-xl font-semibold mb-2">🎯 Share Your Health Story</h4>
                 <p className="text-muted-foreground">
-                  Share what's on your mind about your health. We listen without judgment and understand your concerns in your own words.
+                  Tell us what's happening with your health in your own words. Every story matters, and we're here to listen!
                 </p>
               </div>
             </div>
@@ -238,9 +238,9 @@ export default function Landing() {
                 2
               </div>
               <div>
-                <h4 className="text-xl font-semibold mb-2">Answer Follow-up Questions</h4>
+                <h4 className="text-xl font-semibold mb-2">🎮 Play the Health Game</h4>
                 <p className="text-muted-foreground">
-                  We'll gently guide you through questions that help us understand your unique situation and provide better support.
+                  Answer interactive questions and earn points! Each response helps us understand you better while making the process enjoyable.
                 </p>
               </div>
             </div>
@@ -250,9 +250,9 @@ export default function Landing() {
                 3
               </div>
               <div>
-                <h4 className="text-xl font-semibold mb-2">Get Clear Guidance</h4>
+                <h4 className="text-xl font-semibold mb-2">🏆 Level Up Your Health</h4>
                 <p className="text-muted-foreground">
-                  Get clear, actionable guidance tailored to your situation, with gentle direction on the best next steps for your wellbeing.
+                  Receive personalized guidance, unlock achievements, and track your wellness journey as you level up your health game!
                 </p>
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function Landing() {
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-muted-foreground">
           <p className="mb-4">
-            © 2024 MDSDR.com - Your trusted health companion
+            © 2024 MedSter.com - Making health fun, one level at a time! 🎮
           </p>
           <div className="space-x-4">
             <Link to="/about" className="hover:text-foreground transition-colors">

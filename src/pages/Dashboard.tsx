@@ -14,6 +14,7 @@ import { generatePDFReport } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
 import PricingSection from '@/components/PricingSection';
 import AdvancedAnalytics from '@/components/AdvancedAnalytics';
+import Gamification from '@/components/Gamification';
 
 interface Assessment {
   id: string;
