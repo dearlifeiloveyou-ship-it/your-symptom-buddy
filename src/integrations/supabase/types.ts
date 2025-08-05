@@ -274,6 +274,42 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_assessments: {
+        Row: {
+          ai_analysis: Json | null
+          conditions_detected: Json | null
+          confidence_score: number | null
+          created_at: string
+          description: string | null
+          id: string
+          photo_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          conditions_detected?: Json | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          photo_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          conditions_detected?: Json | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          photo_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null
@@ -355,12 +391,15 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_in_trial: boolean | null
           monthly_assessments_limit: number
           monthly_assessments_used: number
           stripe_customer_id: string | null
           subscribed: boolean
           subscription_end: string | null
           subscription_tier: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
           updated_at: string
           user_id: string | null
         }
@@ -369,12 +408,15 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_in_trial?: boolean | null
           monthly_assessments_limit?: number
           monthly_assessments_used?: number
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -383,12 +425,15 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_in_trial?: boolean | null
           monthly_assessments_limit?: number
           monthly_assessments_used?: number
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -631,6 +676,10 @@ export type Database = {
       }
       reset_monthly_assessments: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      start_trial: {
+        Args: { user_id_param: string }
         Returns: undefined
       }
       update_user_streak: {
