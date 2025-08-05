@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,22 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [showResetForm, setShowResetForm] = useState(false);
-  const { signIn, signUp, resetPassword } = useAuth();
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const { signIn, signUp, resetPassword, updatePassword, session } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user is in password reset mode
+  useEffect(() => {
+    const checkPasswordResetMode = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      if (type === 'recovery' && session) {
+        setIsPasswordReset(true);
+      }
+    };
+    
+    checkPasswordResetMode();
+  }, [session]);
 
   const validateInput = (name: string, value: string, isSignUp: boolean = false) => {
     const errors = { ...validationErrors };
@@ -184,6 +198,85 @@ export default function Auth() {
     
     setIsLoading(false);
   };
+
+  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      setError("Please enter a valid password (8+ chars, uppercase, lowercase, number).");
+      setIsLoading(false);
+      return;
+    }
+
+    const { error } = await updatePassword(password);
+    
+    if (error) {
+      setError(error.message);
+      toast({
+        title: "Password update failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Password updated successfully",
+        description: "You can now sign in with your new password."
+      });
+      setIsPasswordReset(false);
+      navigate('/');
+    }
+    
+    setIsLoading(false);
+  };
+
+  // If user is in password reset mode, show password update form
+  if (isPasswordReset) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
+            <CardDescription className="text-center">
+              Enter your new password
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your new password"
+                  required
+                  onChange={(e) => validateInput('password', e.target.value)}
+                />
+                {validationErrors.password && (
+                  <p className="text-sm text-destructive">{validationErrors.password}</p>
+                )}
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Update Password
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

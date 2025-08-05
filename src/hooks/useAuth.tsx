@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
   subscription: {
     subscribed: boolean;
     subscription_tier: string | null;
@@ -141,6 +142,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ 
+      password: password 
+    });
+    
+    return { error };
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -150,6 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signIn,
       signOut,
       resetPassword,
+      updatePassword,
       subscription,
       checkSubscription
     }}>
