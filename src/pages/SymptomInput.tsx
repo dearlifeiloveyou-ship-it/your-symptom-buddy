@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Mic } from 'lucide-react';
 import { symptomSchema, secureStorage, sanitizeText } from '@/lib/security';
+import VoiceInput from '@/components/VoiceInput';
 
 const SymptomInput = () => {
   const navigate = useNavigate();
@@ -66,13 +67,26 @@ const SymptomInput = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Textarea
-                  placeholder="Example: I've had a headache for 3 days that gets worse in bright light. I also feel nauseous and have trouble sleeping..."
-                  value={symptoms}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  className="min-h-[150px] text-base"
-                  maxLength={2000}
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Describe your symptoms</label>
+                    <VoiceInput
+                      onTranscript={(text) => {
+                        const newText = symptoms ? `${symptoms} ${text}` : text;
+                        handleInputChange(newText);
+                      }}
+                      sessionType="symptom_input"
+                      className="flex-shrink-0"
+                    />
+                  </div>
+                  <Textarea
+                    placeholder="Example: I've had a headache for 3 days that gets worse in bright light. I also feel nauseous and have trouble sleeping... (or click the mic to speak)"
+                    value={symptoms}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    className="min-h-[150px] text-base"
+                    maxLength={2000}
+                  />
+                </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Minimum 10 characters for analysis</span>
                   <span>{symptoms.length}/2000</span>

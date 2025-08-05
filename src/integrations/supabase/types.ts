@@ -542,6 +542,42 @@ export type Database = {
           },
         ]
       }
+      voice_interactions: {
+        Row: {
+          audio_duration: number | null
+          created_at: string | null
+          id: string
+          response_audio_url: string | null
+          response_text: string | null
+          session_type: string
+          transcript: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_duration?: number | null
+          created_at?: string | null
+          id?: string
+          response_audio_url?: string | null
+          response_text?: string | null
+          session_type: string
+          transcript?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_duration?: number | null
+          created_at?: string | null
+          id?: string
+          response_audio_url?: string | null
+          response_text?: string | null
+          session_type?: string
+          transcript?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

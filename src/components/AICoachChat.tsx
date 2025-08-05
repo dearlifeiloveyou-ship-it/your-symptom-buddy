@@ -5,10 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, Brain, Send, Loader2 } from 'lucide-react';
+import { Heart, Brain, Send, Loader2, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import VoiceInput from '@/components/VoiceInput';
 
 interface Message {
   id: string;
@@ -29,6 +30,7 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ coachType, onClose }) => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -133,12 +135,40 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ coachType, onClose }) => {
       };
 
       setMessages(prev => [...prev, aiMessage]);
+
+      // Auto-play AI response if enabled
+      if (data.response) {
+        playAIResponse(data.response);
+      }
       
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to get response from AI coach. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const playAIResponse = async (text: string) => {
+    try {
+      setIsPlayingAudio(true);
+      const { data, error } = await supabase.functions.invoke('text-to-voice', {
+        body: {
+          text,
+          voice: coachType === 'mental_health' ? 'nova' : 'alloy',
+          sessionType: 'ai_coach'
+        }
+      });
+
+      if (error) throw error;
+
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+      audio.onended = () => setIsPlayingAudio(false);
+      audio.onerror = () => setIsPlayingAudio(false);
+      await audio.play();
+    } catch (error) {
+      console.error('Error playing AI response:', error);
+      setIsPlayingAudio(false);
     }
   };
 
@@ -239,9 +269,22 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ coachType, onClose }) => {
                       : `${currentCoach.bgColor} ${currentCoach.color}`
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap flex-1">
+                      {message.content}
+                    </p>
+                    {message.sender === 'ai' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-shrink-0 p-1 h-6 w-6"
+                        onClick={() => playAIResponse(message.content)}
+                        disabled={isPlayingAudio}
+                      >
+                        <Volume2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
@@ -277,27 +320,42 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ coachType, onClose }) => {
           </div>
         </ScrollArea>
 
-        <div className="flex gap-2 pt-2 border-t">
-          <Textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={
-              coachType === 'health'
-                ? 'Ask about your health, wellness goals, or any concerns...'
-                : 'Share what\'s on your mind or how you\'re feeling...'
-            }
-            className="resize-none"
-            rows={2}
-            disabled={isLoading}
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={!inputMessage.trim() || isLoading}
-            className="px-3"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+        <div className="space-y-2 pt-2 border-t">
+          <div className="flex items-center gap-2">
+            <VoiceInput
+              onTranscript={(text) => {
+                setInputMessage(prev => prev ? `${prev} ${text}` : text);
+              }}
+              sessionType="ai_coach"
+              className="flex-shrink-0"
+            />
+            <span className="text-xs text-muted-foreground">
+              Voice input available
+            </span>
+          </div>
+          
+          <div className="flex gap-2">
+            <Textarea
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={
+                coachType === 'health'
+                  ? 'Ask about your health, wellness goals, or any concerns... (or use voice input above)'
+                  : 'Share what\'s on your mind or how you\'re feeling... (or use voice input above)'
+              }
+              className="resize-none"
+              rows={2}
+              disabled={isLoading}
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={!inputMessage.trim() || isLoading}
+              className="px-3"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         
         <div className="text-xs text-muted-foreground text-center">
