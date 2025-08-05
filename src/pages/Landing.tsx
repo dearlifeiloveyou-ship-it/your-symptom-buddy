@@ -4,14 +4,80 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, Heart, Clock, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import PricingSection from '@/components/PricingSection';
+import SEO from '@/components/SEO';
 
 
 export default function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const homePageSchema = {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    "name": "MDSDR.com - AI-Powered Health Symptom Checker",
+    "description": "AI-powered symptom checker and health assessment platform providing medical triage guidance and personalized health coaching.",
+    "url": "https://mdsdr.com",
+    "mainEntity": {
+      "@type": "WebApplication",
+      "name": "MDSDR Symptom Checker",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web Browser",
+      "featureList": [
+        "AI-powered symptom analysis",
+        "Medical triage guidance", 
+        "Health coaching",
+        "Mental health support",
+        "Symptom tracking",
+        "Health reports"
+      ],
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free Plan",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "3 symptom checks per month, basic reports"
+        },
+        {
+          "@type": "Offer", 
+          "name": "Premium Plan",
+          "price": "9.99",
+          "priceCurrency": "USD",
+          "description": "Unlimited checks, AI coaches, detailed reports"
+        }
+      ]
+    },
+    "about": {
+      "@type": "MedicalCondition",
+      "name": "Health Symptom Assessment",
+      "description": "Comprehensive symptom analysis and medical triage guidance using AI technology"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "MDSDR.com",
+      "url": "https://mdsdr.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://mdsdr.com/logo.png"
+      }
+    },
+    "specialty": [
+      "General Medicine",
+      "Symptom Assessment", 
+      "Health Technology",
+      "Medical Triage"
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="MDSDR.com - AI-Powered Health Symptom Checker & Medical Guidance"
+        description="Get instant AI-powered health assessments with MDSDR.com. Check symptoms, receive medical triage guidance, and access personalized health coaching. Trusted by thousands for reliable health insights."
+        keywords="symptom checker, health assessment, AI medical advice, health triage, symptom analysis, medical guidance, health coach, mental health support, medical symptoms, health diagnosis, online doctor, health app"
+        url="https://mdsdr.com"
+        schema={homePageSchema}
+      />
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">

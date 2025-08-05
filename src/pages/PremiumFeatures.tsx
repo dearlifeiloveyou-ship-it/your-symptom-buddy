@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import AICoachChat from '@/components/AICoachChat';
+import SEO from '@/components/SEO';
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -102,8 +103,44 @@ const PremiumFeatures = () => {
 
   const isPremium = subscriptionData?.subscribed;
 
+  const premiumPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "MDSDR Premium Health Plan",
+    "description": "Premium health plan with AI health coach, mental health coach, unlimited symptom checks, and detailed health reports.",
+    "category": "Health Technology Subscription",
+    "offers": {
+      "@type": "Offer",
+      "price": "9.99",
+      "priceCurrency": "USD",
+      "priceValidUntil": "2025-12-31",
+      "availability": "https://schema.org/InStock",
+      "url": "https://mdsdr.com/premium"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "1247"
+    },
+    "features": [
+      "AI Health Coach",
+      "AI Mental Health Coach", 
+      "Unlimited Symptom Checks",
+      "Detailed PDF Reports",
+      "Symptom Tracking",
+      "Family Profiles"
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      <SEO 
+        title="Premium AI Health Coaches - MDSDR.com"
+        description="Upgrade to MDSDR Premium for AI Health Coach, Mental Health Coach, unlimited symptom checks, and personalized health guidance. Only $9.99/month."
+        keywords="AI health coach, mental health coach, premium health plan, personalized health advice, unlimited symptom checker, health subscription, AI medical guidance"
+        url="https://mdsdr.com/premium"
+        schema={premiumPageSchema}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}

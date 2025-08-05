@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { User, Baby, UserPlus, ArrowRight } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const ProfileSelection = () => {
   const navigate = useNavigate();
@@ -60,6 +61,12 @@ const ProfileSelection = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      <SEO 
+        title="Start Symptom Check - MDSDR.com"
+        description="Begin your AI-powered health assessment with MDSDR.com. Choose profile type and get personalized medical triage guidance for you, your child, or as a guest."
+        keywords="start symptom check, health assessment, medical triage, symptom checker, AI diagnosis, health guidance, medical evaluation"
+        url="https://mdsdr.com/profile-selection"
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">

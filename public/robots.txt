@@ -1,3 +1,26 @@
+User-agent: *
+Allow: /
+
+# Important pages for indexing
+Allow: /
+Allow: /about
+Allow: /symptom-library  
+Allow: /premium
+Allow: /trust
+Allow: /profile-selection
+Allow: /auth
+Allow: /disclaimer
+Allow: /privacy
+Allow: /terms
+
+# Block user-specific pages from indexing
+Disallow: /dashboard
+Disallow: /symptom-input
+Disallow: /interview
+Disallow: /results
+Disallow: /track-symptoms
+
+# Special crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +33,5 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Sitemap location
+Sitemap: https://mdsdr.com/sitemap.xml
