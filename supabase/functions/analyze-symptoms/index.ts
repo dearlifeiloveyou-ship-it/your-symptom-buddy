@@ -237,7 +237,7 @@ serve(async (req) => {
             interview_responses: interviewResponses,
             api_results: null, // Will be updated after analysis
             conditions: [],
-            triage_level: 'low',
+            triage_level: 'self_care',
             next_steps: 'Analyzing...'
           })
           .select()
@@ -271,19 +271,31 @@ serve(async (req) => {
       analysisMethod: analysisResult.analysisMethod
     });
 
+    // Map AI triage levels to database constraint values
+    const mapTriageLevel = (aiLevel: string) => {
+      switch (aiLevel) {
+        case 'high': return 'urgent';
+        case 'medium': return 'routine';
+        case 'low': return 'self_care';
+        case 'emergency': return 'emergency';
+        default: return 'self_care';
+      }
+    };
+
     // Update assessment with results if we have an assessment ID
     if (assessmentId && isAuthenticated) {
       try {
+        const mappedTriageLevel = mapTriageLevel(analysisResult.triageLevel || 'low');
         await supabaseService
           .from('assessments')
           .update({
             api_results: analysisResult,
             conditions: analysisResult.conditions || [],
-            triage_level: analysisResult.triageLevel || 'low',
+            triage_level: mappedTriageLevel,
             next_steps: analysisResult.actions || 'No specific actions recommended'
           })
           .eq('id', assessmentId);
-        console.log('Assessment updated successfully');
+        console.log('Assessment updated successfully with triage level:', mappedTriageLevel);
       } catch (updateError) {
         console.error('Error updating assessment:', updateError);
       }
