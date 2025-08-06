@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,9 +12,19 @@ import VoiceInput from '@/components/VoiceInput';
 
 const SymptomInput = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [symptoms, setSymptoms] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [validationError, setValidationError] = useState('');
+
+  // Only require auth if this is a "myself" profile type assessment
+  useEffect(() => {
+    const currentAssessment = secureStorage.get('currentAssessment');
+    if (currentAssessment?.profileType === 'myself' && !user) {
+      // Save current progress and redirect to auth
+      navigate('/auth');
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (value: string) => {
     setSymptoms(value);

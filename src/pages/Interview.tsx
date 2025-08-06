@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -43,6 +44,7 @@ const mockQuestions: Question[] = [
 
 const Interview = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +59,12 @@ const Interview = () => {
       return;
     }
     
+    // Only require auth if this is a "myself" profile type assessment
+    if (assessmentData.profileType === 'myself' && !user) {
+      navigate('/auth');
+      return;
+    }
+    
     // Check if assessment is stale (older than 1 hour)
     const isStale = assessmentData.timestamp && (Date.now() - assessmentData.timestamp > 3600000);
     if (isStale) {
@@ -64,7 +72,7 @@ const Interview = () => {
       navigate('/profile-selection');
       return;
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const handleResponse = (value: any) => {
     setResponses(prev => ({
