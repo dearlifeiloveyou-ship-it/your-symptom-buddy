@@ -204,80 +204,134 @@ const HealthProfile = () => {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {/* Basic Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Basic Demographics */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Demographics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-1">
-                      {profile?.date_of_birth && (
-                        <p className="text-2xl font-bold">{calculateAge(profile.date_of_birth)} years</p>
-                      )}
-                      {profile?.sex && (
-                        <p className="text-sm text-muted-foreground capitalize">{profile.sex}</p>
-                      )}
+              {/* Profile Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Personal Information
+                  </CardTitle>
+                  <CardDescription>
+                    Your basic health profile and medical overview
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                      <p className="text-lg font-medium">{profile?.full_name || 'Not provided'}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    {profile?.date_of_birth && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Age</label>
+                        <p className="text-lg font-medium">{calculateAge(profile.date_of_birth)} years old</p>
+                      </div>
+                    )}
+                    {profile?.sex && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Sex</label>
+                        <p className="text-lg font-medium capitalize">{profile.sex}</p>
+                      </div>
+                    )}
+                    {profile?.activity_level && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Activity Level</label>
+                        <p className="text-lg font-medium capitalize">
+                          {profile.activity_level.replace('_', ' ')}
+                        </p>
+                      </div>
+                    )}
+                    {profile?.preferred_units && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Unit Preference</label>
+                        <p className="text-lg font-medium capitalize">{profile.preferred_units}</p>
+                      </div>
+                    )}
+                    {profile?.emergency_contact && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Emergency Contact</label>
+                        <p className="text-lg font-medium">{profile.emergency_contact}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
+              {/* Health Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* BMI Card */}
                 {profile?.bmi && (
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Calculator className="w-4 h-4" />
-                        BMI
+                        Body Mass Index
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-1">
-                        <p className="text-2xl font-bold">{profile.bmi}</p>
+                      <div className="space-y-2">
+                        <p className="text-3xl font-bold">{profile.bmi}</p>
                         <Badge className={getBmiCategory(profile.bmi).color}>
                           {getBmiCategory(profile.bmi).category}
                         </Badge>
+                        {profile.height_cm && profile.weight_kg && (
+                          <p className="text-xs text-muted-foreground">
+                            {profile.height_cm}cm, {profile.weight_kg}kg
+                          </p>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 )}
 
-                {/* Health Conditions */}
+                {/* Medical Conditions */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Conditions</CardTitle>
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Heart className="w-4 h-4" />
+                      Medical Conditions
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-1">
-                      <p className="text-2xl font-bold">
+                    <div className="space-y-2">
+                      <p className="text-3xl font-bold">
                         {profile?.medical_conditions?.length || 0}
                       </p>
-                      <p className="text-sm text-muted-foreground">Active conditions</p>
+                      <p className="text-sm text-muted-foreground">
+                        {profile?.medical_conditions?.length === 1 ? 'condition' : 'conditions'} tracked
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Activity Level */}
+                {/* Health Goals */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Activity</CardTitle>
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      Health Goals
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium capitalize">
-                        {profile?.activity_level?.replace('_', ' ') || 'Not set'}
+                    <div className="space-y-2">
+                      <p className="text-3xl font-bold">
+                        {profile?.health_goals?.length || 0}
                       </p>
-                      <p className="text-xs text-muted-foreground">Activity level</p>
+                      <p className="text-sm text-muted-foreground">
+                        active {profile?.health_goals?.length === 1 ? 'goal' : 'goals'}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Quick Actions */}
+              {/* Health Services */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle>Health Services</CardTitle>
+                  <CardDescription>
+                    Access comprehensive health assessment and tracking tools
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -287,7 +341,8 @@ const HealthProfile = () => {
                       onClick={() => navigate('/profile-selection')}
                     >
                       <Plus className="w-6 h-6" />
-                      New Symptom Check
+                      <span className="text-sm font-medium">Symptom Assessment</span>
+                      <span className="text-xs text-muted-foreground">Start new health check</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -295,7 +350,8 @@ const HealthProfile = () => {
                       onClick={() => navigate('/track-symptoms')}
                     >
                       <TrendingUp className="w-6 h-6" />
-                      Track Symptoms
+                      <span className="text-sm font-medium">Symptom Tracking</span>
+                      <span className="text-xs text-muted-foreground">Monitor health patterns</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -303,7 +359,8 @@ const HealthProfile = () => {
                       onClick={() => navigate('/dashboard')}
                     >
                       <Heart className="w-6 h-6" />
-                      View Analytics
+                      <span className="text-sm font-medium">Health Dashboard</span>
+                      <span className="text-xs text-muted-foreground">View detailed analytics</span>
                     </Button>
                   </div>
                 </CardContent>
