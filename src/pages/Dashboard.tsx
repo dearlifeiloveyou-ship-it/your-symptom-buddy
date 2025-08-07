@@ -14,7 +14,7 @@ import { generatePDFReport } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
 import PricingSection from '@/components/PricingSection';
 import AdvancedAnalytics from '@/components/AdvancedAnalytics';
-import Gamification from '@/components/Gamification';
+
 import NotificationManager from '@/components/NotificationManager';
 import PhotoAssessment from '@/components/PhotoAssessment';
 import VoiceChat from '@/components/VoiceChat';
@@ -393,12 +393,11 @@ const Dashboard = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1">
+            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 gap-1">
               <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
               <TabsTrigger value="assessments" className="text-xs sm:text-sm">Assessments</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
               <TabsTrigger value="insights" className="text-xs sm:text-sm">AI Insights</TabsTrigger>
-              <TabsTrigger value="gamification" className="text-xs sm:text-sm">🎮</TabsTrigger>
               <TabsTrigger value="notifications" className="text-xs sm:text-sm">🔔</TabsTrigger>
               <TabsTrigger value="photo" className="text-xs sm:text-sm">📸</TabsTrigger>
               <TabsTrigger value="voice" className="text-xs sm:text-sm">🎤</TabsTrigger>
@@ -809,9 +808,6 @@ const Dashboard = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="gamification" className="space-y-6">
-              <Gamification />
-            </TabsContent>
             
             <TabsContent value="notifications" className="space-y-6">
               <NotificationManager />

@@ -12,7 +12,7 @@ export default function About() {
           <Button variant="ghost" asChild>
             <Link to="/">← Back to Home</Link>
           </Button>
-          <h1 className="text-2xl font-bold text-primary">About MDSDR 🎮</h1>
+          <h1 className="text-2xl font-bold text-primary">About MDSDR</h1>
           <div className="space-x-4">
             <Button asChild>
               <Link to="/profile-selection">Start Assessment</Link>
@@ -25,11 +25,10 @@ export default function About() {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Where Healthcare Meets Fun! 🎉
+            Evidence-Based, Patient-Centered Care
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            At MDSDR (pronounced "med-ster"), we believe health should be engaging, not scary. Founded in 2024 by a passionate group of healthcare professionals, 
-            we're revolutionizing wellness by making it fun, gamified, and accessible to everyone. Because taking care of yourself should feel like leveling up!
+            MDSDR (pronounced "med-ster") delivers clear, clinician-informed guidance with AI to help you understand symptoms and next steps—accurate, supportive, and accessible.
           </p>
         </div>
       </section>
@@ -39,27 +38,22 @@ export default function About() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 className="text-3xl font-bold mb-6">Our Mission 🎯</h3>
+              <h3 className="text-3xl font-bold mb-6">Our Mission</h3>
               <p className="text-lg text-muted-foreground mb-6">
-                To transform healthcare from scary and confusing into fun and engaging! We're creating 
-                the world's first gamified health platform where taking care of yourself feels like 
-                playing your favorite game - complete with achievements, rewards, and level-ups.
+                Make healthcare understandable and actionable. We combine trusted medical frameworks with AI to provide timely triage guidance, symptom education, and personalized insights.
               </p>
               <p className="text-lg text-muted-foreground">
-                Founded by healthcare professionals who got tired of seeing patients stressed about their health, 
-                we decided to change the game. Literally. Because when health is fun, people actually take better care of themselves!
+                Founded by healthcare professionals, our focus is accuracy, empathy, and safety—reducing anxiety and helping people make informed decisions.
               </p>
             </div>
             <Card>
               <CardHeader>
                 <Target className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Our Vision 🌟</CardTitle>
+                <CardTitle>Our Vision</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  A world where health is the most engaging game you'll ever play! Where checking your symptoms 
-                  feels like unlocking achievements, where tracking your wellness earns you badges, and where 
-                  taking care of yourself becomes the most rewarding adventure of your life.
+                  Deliver a trusted digital front door for everyday health questions—bringing transparent explanations, risk awareness, and personalized follow-up recommendations that people can rely on.
                 </CardDescription>
               </CardContent>
             </Card>

@@ -81,7 +81,7 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">MDSDR 🎮</h1>
+          <h1 className="text-2xl font-bold text-primary">MDSDR</h1>
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
@@ -122,11 +122,10 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Health Should Be Fun! 🎉
+            Trusted AI-Powered Health Guidance
           </h2>
           <p className="text-xl text-muted-foreground mb-8 text-balance">
-            Welcome to MDSDR (pronounced "med-ster") - where we believe health should be engaging, not overwhelming. 
-            Founded in 2024 by a passionate group of healthcare professionals, we're determined to improve people's health through fun, gamified experiences that make wellness exciting!
+            MDSDR (pronounced "med-ster") provides evidence-based symptom assessments and personalized health insights—clear, supportive, and accessible.
           </p>
           <div className="space-x-4">
             <Button 
@@ -166,11 +165,11 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Heart className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Health Made Fun 🎮</CardTitle>
+                <CardTitle>Engaging & Easy to Use</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Earn points, unlock badges, and track streaks! We gamify your health journey to make wellness engaging and rewarding.
+                Clear flows and supportive language make it simple to describe symptoms and understand guidance—no gimmicks.
               </CardDescription>
               </CardContent>
             </Card>
@@ -202,11 +201,11 @@ export default function Landing() {
             <Card>
               <CardHeader>
                 <Users className="w-10 h-10 text-primary mb-2" />
-                <CardTitle>Family Fun Together 👨‍👩‍👧‍👦</CardTitle>
+                <CardTitle>Family Profiles</CardTitle>
               </CardHeader>
               <CardContent>
               <CardDescription>
-                Compete with family members, share achievements, and make wellness a fun family activity that everyone can enjoy!
+                Create profiles for kids or family members and manage assessments securely in one place.
               </CardDescription>
               </CardContent>
             </Card>
@@ -226,7 +225,7 @@ export default function Landing() {
                 1
               </div>
               <div>
-                <h4 className="text-xl font-semibold mb-2">🎯 Share Your Health Story</h4>
+                <h4 className="text-xl font-semibold mb-2">Share Your Health Story</h4>
                 <p className="text-muted-foreground">
                   Tell us what's happening with your health in your own words. Every story matters, and we're here to listen!
                 </p>
@@ -238,9 +237,9 @@ export default function Landing() {
                 2
               </div>
               <div>
-                <h4 className="text-xl font-semibold mb-2">🎮 Play the Health Game</h4>
+                <h4 className="text-xl font-semibold mb-2">Answer Guided Questions</h4>
                 <p className="text-muted-foreground">
-                  Answer interactive questions and earn points! Each response helps us understand you better while making the process enjoyable.
+                  We ask clinically-informed questions to capture key details and context.
                 </p>
               </div>
             </div>
