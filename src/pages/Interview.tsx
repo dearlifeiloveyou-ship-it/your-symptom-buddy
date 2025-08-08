@@ -132,18 +132,43 @@ const Interview = () => {
 
       if (error) {
         console.error('Analysis error details:', error);
-        if (error.message?.includes('Monthly assessment limit')) {
+        const anyErr: any = error as any;
+        const status = anyErr?.context?.response?.status ?? anyErr?.status;
+        const msg = String(anyErr?.message || '');
+
+        // Quota and rate limiting
+        if (msg.includes('Monthly assessment limit')) {
           toast.error('Monthly assessment limit reached. Please upgrade to continue.');
           navigate('/premium');
           return;
-        } else if (error.message?.includes('rate limit')) {
+        }
+        if (msg.toLowerCase().includes('rate limit') || status === 429) {
           toast.error('Too many requests. Please wait a moment and try again.');
           return;
-        } else if (error.message?.includes('Invalid content')) {
-          toast.error('Please check your symptom description for invalid content.');
+        }
+
+        // Validation errors -> send user back to edit symptoms
+        if (
+          msg.includes('Invalid content') ||
+          msg.includes('at least 10 characters') ||
+          msg.toLowerCase().includes('too long')
+        ) {
+          toast.error('Please review your symptom description and try again.');
           navigate('/symptom-input');
           return;
         }
+
+        // Function unavailable or not found -> keep user here
+        if (
+          status === 404 ||
+          msg.toLowerCase().includes('not found') ||
+          msg.toLowerCase().includes('unavailable')
+        ) {
+          toast.error('Analysis service is temporarily unavailable. Please try again shortly.');
+          return;
+        }
+
+        // Generic error
         throw error;
       }
 
@@ -166,14 +191,16 @@ const Interview = () => {
       
       toast.success('Analysis complete!');
       navigate('/results');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Analysis error:', error);
-      
-      // More specific error messages
-      if (error.message?.includes('Assessment data not found')) {
+
+      const msg = String(error?.message || '');
+      if (msg.includes('Assessment data not found')) {
         toast.error('Session expired. Please start a new assessment.');
         navigate('/profile-selection');
-      } else if (error.message?.includes('fetch')) {
+      } else if (msg.toLowerCase().includes('not found') || msg.toLowerCase().includes('unavailable')) {
+        toast.error('Analysis service is temporarily unavailable. Please try again shortly.');
+      } else if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('network')) {
         toast.error('Network error. Please check your connection and try again.');
       } else {
         toast.error('There was an error analyzing your symptoms. Please try again.');
