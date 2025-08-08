@@ -80,11 +80,12 @@ export default function Landing() {
       />
       {/* Header */}
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">MDSDR</h1>
-          
+        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between gap-4">
+          <Link to="/" className="inline-flex items-center gap-2" aria-label="MDSDR home">
+            <span className="text-2xl font-bold text-primary leading-none tracking-tight">MDSDR</span>
+          </Link>
           {/* Navigation */}
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden md:flex items-center gap-6">
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
               About MDSDR
             </Link>
@@ -99,7 +100,7 @@ export default function Landing() {
             </Link>
           </nav>
 
-          <div className="space-x-4">
+          <div className="flex items-center gap-2">
             {user ? (
               <Button asChild>
                 <Link to="/dashboard">Dashboard</Link>
@@ -276,7 +277,7 @@ export default function Landing() {
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-muted-foreground">
           <p className="mb-4">
-            © 2024 MDSDR.com - Making health fun, one level at a time! 🎮
+            © 2024 MDSDR.com
           </p>
           <div className="space-x-4">
             <Link to="/about" className="hover:text-foreground transition-colors">
