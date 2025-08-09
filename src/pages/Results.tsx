@@ -140,6 +140,10 @@ const Results = () => {
     setIsSaving(true);
     try {
       const assessmentData = secureStorage.get('currentAssessment');
+      // Normalize triage level to satisfy DB CHECK constraint and avoid invalid values
+      const allowedTriage = new Set(['low', 'medium', 'high']);
+      const triageLevelRaw = typeof results.triageLevel === 'string' ? results.triageLevel.toLowerCase().trim() : null;
+      const triageLevelValue = triageLevelRaw && allowedTriage.has(triageLevelRaw) ? triageLevelRaw : null;
       
       const { error } = await supabase
         .from('assessments')
@@ -147,11 +151,11 @@ const Results = () => {
           user_id: user.id,
           symptom_description: assessmentData?.symptoms || '',
           interview_responses: assessmentData?.interviewResponses || {},
-          triage_level: results.triageLevel,
-          conditions: JSON.stringify(results.conditions),
+          triage_level: triageLevelValue,
+          conditions: results.conditions as any,
           next_steps: results.actions,
           api_results: {
-            triageLevel: results.triageLevel,
+            triageLevel: triageLevelValue ?? results.triageLevel,
             actions: results.actions,
             analysis_timestamp: new Date().toISOString()
           }
