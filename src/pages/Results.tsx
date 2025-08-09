@@ -177,16 +177,20 @@ const Results = () => {
 
   const handleGeneratePDF = () => {
     try {
-      const assessmentData = secureStorage.get('currentAssessment');
-      if (results && assessmentData) {
-        generatePDFReport({
-          symptoms: assessmentData.symptoms || '',
-          interviewResponses: assessmentData.interviewResponses || {},
-          profileData: assessmentData.profileData,
-          analysisResults: results
-        }, user?.email);
-        toast.success('PDF report generated and downloaded!');
+      if (!results) {
+        toast.error('No results to export.');
+        return;
       }
+      const assessmentData = secureStorage.get('currentAssessment');
+      const payload = {
+        symptoms: assessmentData?.symptoms || 'No symptom description provided',
+        interviewResponses: assessmentData?.interviewResponses || {},
+        profileData: assessmentData?.profileData,
+        analysisResults: results
+      } as const;
+
+      generatePDFReport(payload as any, user?.email);
+      toast.success('Preparing your PDF report...');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Failed to generate PDF report.');

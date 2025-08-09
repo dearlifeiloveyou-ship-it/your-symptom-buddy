@@ -197,7 +197,20 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
   doc.text('© 2024 MDSDR.com - Confidential Medical Information', margin, pageHeight - 10);
   doc.text(`Page 1 of 1`, pageWidth - margin - 20, pageHeight - 10);
 
-  // Save the PDF
+  // Save or open the PDF (mobile-friendly)
   const fileName = `MDSDR-Assessment-${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  try {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } else {
+      doc.save(fileName);
+    }
+  } catch {
+    // Fallback to direct download
+    doc.save(fileName);
+  }
 };
