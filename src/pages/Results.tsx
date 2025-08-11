@@ -149,7 +149,10 @@ const Results = () => {
         .from('assessments')
         .insert({
           user_id: user.id,
-          symptom_description: assessmentData?.symptoms || '',
+          symptom_description:
+            typeof assessmentData?.symptoms === 'string'
+              ? assessmentData.symptoms
+              : JSON.stringify(assessmentData?.symptoms || []),
           interview_responses: assessmentData?.interviewResponses || {},
           triage_level: triageLevelValue,
           conditions: results.conditions as any,
