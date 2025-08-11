@@ -23,7 +23,7 @@ const ProfileSelection = () => {
   });
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // Fetch user profile data when component mounts
+  // Fetch user profile data when a user session becomes available or changes
   useEffect(() => {
     if (user) {
       fetchUserProfile();
