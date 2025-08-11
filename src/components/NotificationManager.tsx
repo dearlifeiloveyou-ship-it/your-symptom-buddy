@@ -12,7 +12,7 @@ interface NotificationSettings {
   streakReminder: boolean;
   healthTips: boolean;
   medicationReminder: boolean;
-  assessmentFollow: boolean;
+  assessmentFollowUp: boolean;
 }
 
 interface NotificationManagerProps {
@@ -28,7 +28,7 @@ export default function NotificationManager({ className = "" }: NotificationMana
     streakReminder: true,
     healthTips: true,
     medicationReminder: false,
-    assessmentFollow: true
+    assessmentFollowUp: true
   });
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function NotificationManager({ className = "" }: NotificationMana
     }
 
     // Schedule assessment follow-up (weekly)
-    if (settings.assessmentFollow) {
+    if (settings.assessmentFollowUp) {
       scheduleWeekly('Follow-up Assessment 📋', 'It\'s been a week since your last assessment. How are you feeling?');
     }
   };
@@ -327,8 +327,8 @@ export default function NotificationManager({ className = "" }: NotificationMana
                 </div>
               </div>
               <Switch
-                checked={settings.assessmentFollow}
-                onCheckedChange={(checked) => updateSetting('assessmentFollow', checked)}
+                checked={settings.assessmentFollowUp}
+                onCheckedChange={(checked) => updateSetting('assessmentFollowUp', checked)}
               />
             </div>
           </div>
