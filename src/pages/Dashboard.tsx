@@ -260,7 +260,7 @@ const Dashboard = () => {
       }
 
       generatePDFReport({
-        symptoms: JSON.stringify(symptoms),
+        symptoms: symptoms,
         factors: factors,
         assessments: assessments,
         insights: healthInsights,

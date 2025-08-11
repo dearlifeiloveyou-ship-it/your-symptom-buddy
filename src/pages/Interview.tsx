@@ -122,7 +122,9 @@ const Interview = () => {
       // Call the medical analysis API
       const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
         body: {
-          symptoms: sanitizeText(assessmentData.symptoms || ''),
+          symptoms: Array.isArray(assessmentData.symptoms)
+            ? sanitizeText(JSON.stringify(assessmentData.symptoms))
+            : sanitizeText(assessmentData.symptoms || ''),
           interviewResponses: sanitizedResponses,
           profileData: assessmentData.profileData
         }
