@@ -137,20 +137,25 @@ const Results = () => {
 
     if (!results) return;
 
+    const assessmentData = secureStorage.get('currentAssessment');
+    if (!assessmentData) {
+      toast.error('No assessment data found');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const assessmentData = secureStorage.get('currentAssessment');
       // Normalize triage level to satisfy DB CHECK constraint and avoid invalid values
       const allowedTriage = new Set(['low', 'medium', 'high']);
       const triageLevelRaw = typeof results.triageLevel === 'string' ? results.triageLevel.toLowerCase().trim() : null;
       const triageLevelValue = triageLevelRaw && allowedTriage.has(triageLevelRaw) ? triageLevelRaw : null;
-      
+
       const { error } = await supabase
         .from('assessments')
         .insert({
           user_id: user.id,
-          symptom_description: assessmentData?.symptoms || '',
-          interview_responses: assessmentData?.interviewResponses || {},
+          symptom_description: assessmentData.symptoms || '',
+          interview_responses: assessmentData.interviewResponses || {},
           triage_level: triageLevelValue,
           conditions: results.conditions as any,
           next_steps: results.actions,

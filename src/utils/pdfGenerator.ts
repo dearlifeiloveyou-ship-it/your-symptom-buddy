@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 
 interface AssessmentData {
-  symptoms: string;
+  symptoms: string | Array<Record<string, unknown>>;
   interviewResponses?: Record<string, any>;
   profileData?: {
     age?: string;
@@ -96,10 +96,13 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
   }
 
   // Symptom Description
-  if (typeof assessmentData.symptoms === 'string') {
-    addSection('Chief Complaint / Symptoms', assessmentData.symptoms);
+  if (Array.isArray(assessmentData.symptoms)) {
+    addSection(
+      'Tracked Symptoms Summary',
+      `This report includes ${assessmentData.symptoms.length} tracked symptom entries over ${assessmentData.timeRange || 'the selected period'}.`
+    );
   } else {
-    addSection('Tracked Symptoms Summary', `This report includes ${JSON.parse(assessmentData.symptoms).length} tracked symptom entries over ${assessmentData.timeRange || 'the selected period'}.`);
+    addSection('Chief Complaint / Symptoms', assessmentData.symptoms);
   }
 
   // Interview Responses
@@ -200,7 +203,9 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
   // Save or open the PDF (mobile-friendly)
   const fileName = `MDSDR-Assessment-${new Date().toISOString().split('T')[0]}.pdf`;
   try {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      typeof navigator !== 'undefined' &&
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile) {
       const blob = doc.output('blob');
       const url = URL.createObjectURL(blob);
@@ -214,3 +219,4 @@ export const generatePDFReport = (assessmentData: AssessmentData, userEmail?: st
     doc.save(fileName);
   }
 };
+
